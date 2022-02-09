@@ -115,6 +115,10 @@ class EmpennageWeight_SmallTurboprop(ExplicitComponent):
 
 
 class FuselageWeight_SmallTurboprop(ExplicitComponent):
+    """ Inputs: MTOW, ac|geom|fuselage|length, ac|geom|fuselage|height, ac|geom|fuselage|width, ac|geom|fuselage|S_wet, ac|geom|gstab|c4_wing_c4, ac|q_cruise
+        Outputs: W_fuselage 
+        
+        """
     def initialize(self):
         #self.options.declare('num_nodes', default=1, desc='Number of flight/control conditions')
         #define configuration parameters
@@ -159,8 +163,8 @@ class FuselageWeight_SmallTurboprop(ExplicitComponent):
         J['W_fuselage','ac|q_cruise'] =  0.052 * inputs['ac|geom|fuselage|S_wet']**1.086 * (n_ult * inputs['ac|weights|MTOW'])**0.177 * inputs['ac|geom|hstab|c4_to_wing_c4']**-0.051 * (inputs['ac|geom|fuselage|length']/inputs['ac|geom|fuselage|height'])**-0.072 * 0.241 * inputs['ac|q_cruise']**(0.241-1)
 
 class NacelleWeight_SmallSingleTurboprop(ExplicitComponent):
-    """Inputs: MTOW, ac|geom|wing|S_ref, ac|geom|wing|AR, ac|geom|wing|c4sweep, ac|geom|wing|taper, ac|geom|wing|toverc, V_H (max SL speed)
-    Outputs: W_wing
+    """Inputs: P_TO
+    Outputs: W_nacelle
     Metadata: n_ult (ult load factor)
 
     """
@@ -190,8 +194,8 @@ class NacelleWeight_SmallSingleTurboprop(ExplicitComponent):
         J['W_nacelle','P_TO'] =  0.5 * 2.5*inputs['P_TO']**(0.5-1)
 
 class NacelleWeight_MultiTurboprop(ExplicitComponent):
-    """Inputs: MTOW, ac|geom|wing|S_ref, ac|geom|wing|AR, ac|geom|wing|c4sweep, ac|geom|wing|taper, ac|geom|wing|toverc, V_H (max SL speed)
-    Outputs: W_wing
+    """Inputs: P_TO
+    Outputs: W_nacelle
     Metadata: n_ult (ult load factor)
 
     """
@@ -221,8 +225,8 @@ class NacelleWeight_MultiTurboprop(ExplicitComponent):
         J['W_nacelle','P_TO'] =  0.14
 
 class LandingGearWeight_SmallTurboprop(ExplicitComponent):
-    """Inputs: MTOW, ac|geom|wing|S_ref, ac|geom|wing|AR, ac|geom|wing|c4sweep, ac|geom|wing|taper, ac|geom|wing|toverc, V_H (max SL speed)
-    Outputs: W_wing
+    """Inputs: ac|weights|MLW, ac|geom|maingear|length, ac|geom|nosegear|length
+    Outputs: W_gear
     Metadata: n_ult (ult load factor)
 
     """
@@ -263,6 +267,10 @@ class LandingGearWeight_SmallTurboprop(ExplicitComponent):
         J['W_gear','ac|geom|nosegear|length'] = 0.125*(n_ult*inputs['ac|weights|MLW'])**0.566 * (inputs['ac|geom|nosegear|length']/12)**(0.845-1)*(1/12) *0.845
 
 class FuelSystemWeight_SmallTurboprop(ExplicitComponent):
+    """Inputs: ac|weights|W_fuel_max
+    Outputs: W_fuelsystem
+    
+    """
     def initialize(self):
         #self.options.declare('num_nodes', default=1, desc='Number of flight/control conditions')
         #define configuration parameters
@@ -296,6 +304,10 @@ class FuelSystemWeight_SmallTurboprop(ExplicitComponent):
         J['W_fuelsystem','ac|weights|W_fuel_max'] =  2.49 * 0.726 *(inputs['ac|weights|W_fuel_max']*1.0/Kfsp)**(0.726-1) * (1.0/Kfsp) * (0.5)**0.363
 
 class EquipmentWeight_SmallTurboprop(ExplicitComponent):
+    """Inputs: ac|weights|MTOW, ac|num_passengers_max, ac|geom|fuselage|length, ac|geom|wing|AR, ac|geom|wing|S_ref, W_fuelsystem
+    Output:" W_equipment
+    
+    """
     def setup(self):
         self.add_input('ac|weights|MTOW', units='lb',desc='Max takeoff weight')
         self.add_input('ac|num_passengers_max',desc='Number of passengers')
