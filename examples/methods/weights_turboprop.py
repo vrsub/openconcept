@@ -70,8 +70,8 @@ class WingWeight_SmallTurboprop(ExplicitComponent):
 
 
 class EmpennageWeight_SmallTurboprop(ExplicitComponent):
-    """Inputs: MTOW, ac|geom|wing|S_ref, ac|geom|wing|AR, ac|geom|wing|c4sweep, ac|geom|wing|taper, ac|geom|wing|toverc, V_H (max SL speed)
-    Outputs: W_wing
+    """Inputs: ac|geom|hstab|S_ref, ac|geom|vstab|S_ref
+    Outputs: W_empennage
     Metadata: n_ult (ult load factor)
 
     """
