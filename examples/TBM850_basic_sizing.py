@@ -22,24 +22,21 @@ from openconcept.analysis.performance.mission_profiles import BasicMission
 
 class TBM850AirplaneModel(Group):
     """
-    A custom model specific to the TBM 850 airplane
-    This class will be passed in to the mission analysis code.
-
+    Airplane model of TBM 850 fuselage with custom wing sizing
+    Passed into mission analysis codes
     """
     def initialize(self):
         self.options.declare('num_nodes', default=1)
         self.options.declare('flight_phase', default=None)
-
+    
     def setup(self):
         nn = self.options['num_nodes']
         flight_phase = self.options['flight_phase']
 
-        # any control variables other than throttle and braking need to be defined here
         controls = self.add_subsystem('controls', IndepVarComp(), promotes_outputs=['*'])
-        controls.add_output('prop1rpm', val=np.ones((nn,)) * 2000, units='rpm')
+        controls.add_output('prop1rpm', val=np.ones((nn,))*2000, units='rpm')
 
-        # a propulsion system needs to be defined in order to provide thrust
-        # information for the mission analysis code
+        # define propulsion system
         propulsion_promotes_outputs = ['fuel_flow', 'thrust']
         propulsion_promotes_inputs = ["fltcond|*", "ac|propulsion|*", "throttle"]
 
@@ -48,7 +45,9 @@ class TBM850AirplaneModel(Group):
                            promotes_outputs=propulsion_promotes_outputs)
         self.connect('prop1rpm', 'propmodel.prop1.rpm')
 
-        # use a different drag coefficient for takeoff versus cruise
+        # self.connect('propmodel.prop1.component_weight', 'W_propeller')
+        # self.connect('propmodel.eng1.component_weight', 'W_engine')
+
         if flight_phase not in ['climb','descent']:
             cd0_source = 'ac|aero|polar|CD0_cruise'
         else:
@@ -58,15 +57,6 @@ class TBM850AirplaneModel(Group):
                                             'fltcond|q', ('e', 'ac|aero|polar|e')],
                            promotes_outputs=['drag'])
 
-        # generally the weights module will be custom to each airplane
-        self.add_subsystem('OEW', SingleTurboPropEmptyWeight(),
-                           promotes_inputs=['*', ('P_TO', 'ac|propulsion|engine|rating')], # Is this a connection between P_TO in weights_truboprop and the engine rating in aircraft data?
-                           promotes_outputs=[('OEW','ac|weights|OEW')])
-        self.connect('propmodel.prop1.component_weight', 'W_propeller')
-        self.connect('propmodel.eng1.component_weight', 'W_engine')
-
-        # airplanes which consume fuel will need to integrate
-        # fuel usage across the mission and subtract it from TOW
         intfuel = self.add_subsystem('intfuel', Integrator(num_nodes=nn, method='simpson', diff_units='s',
                                                               time_setup='duration'), promotes_inputs=['*'], promotes_outputs=['*'])
         intfuel.add_integrand('fuel_used', rate_name='fuel_flow', val=1.0, units='kg')
@@ -77,10 +67,11 @@ class TBM850AirplaneModel(Group):
                                                      scaling_factors=[1,1,1, -1]),
                            promotes_outputs=['weight'],
                            promotes_inputs=['*'])
-        
 
-class TBMAnalysisGroup(Group):
+class SizingAnalysisGroup(Group):   
+    
     """This is an example of a balanced field takeoff and three-phase mission analysis.
+
     """
     def setup(self):
         # Define number of analysis points to run pers mission segment
@@ -109,7 +100,7 @@ class TBMAnalysisGroup(Group):
         dv_comp.add_output_from_dict('ac|geom|nosegear|length')
         dv_comp.add_output_from_dict('ac|geom|maingear|length')
 
-        dv_comp.add_output_from_dict('ac|weights|MTOW')
+        # dv_comp.add_output_from_dict('ac|weights|MTOW')
         # dv_comp.add_output_from_dict('ac|weights|W_fuel_max')
         dv_comp.add_output_from_dict('ac|weights|MLW')
         dv_comp.add_output('ac|weights|payload', val=849, units = 'lb')
@@ -120,36 +111,31 @@ class TBMAnalysisGroup(Group):
         dv_comp.add_output_from_dict('ac|num_passengers_max')
         dv_comp.add_output_from_dict('ac|q_cruise')
 
-        # Run a full mission analysis including takeoff, climb, cruise, and descent
         analysis = self.add_subsystem('analysis',
                                       BasicMission(num_nodes=nn,
                                                           aircraft_model=TBM850AirplaneModel),
                                       promotes_inputs=['*'], promotes_outputs=['*'])
-        
+
         self.add_subsystem('OEW', SingleTurboPropEmptyWeight(),
                            promotes_inputs=['*', ('P_TO', 'ac|propulsion|engine|rating')], # Is this a connection between P_TO in weights_truboprop and the engine rating in aircraft data?
                            promotes_outputs=[('OEW','ac|weights|OEW')])
-        self.connect('propmodel.prop1.component_weight', 'W_propeller')
-        self.connect('propmodel.eng1.component_weight', 'W_engine')
-
+        
         self.add_subsystem('MTOW', AddSubtractComp(output_name='ac|weights|MTOW',
                                                      input_names=['ac|weights|OEW', 'ac|weights|payload','ac|weights|W_fuel_max'],
                                                      units='kg', vec_size=[1,1,1],
                                                      scaling_factors=[1,1,1]),
                            promotes_outputs=['ac|weights|MTOW'],
                            promotes_inputs=['*'])
-
-        self.connect('descent.fuel_used_final', 'ac|weights|W_fuel_max')
-        # self.connect('cruise.ac|weights|OEW', 'ac|weights|OEW')
-        # self.set_input_defaults('ac|weights|MTOW',acdata['ac']['weights']['MTOW']['value'], units=acdata['ac']['weights']['MTOW']['units'])
-        self.set_input_defaults('ac|weights|W_fuel_max',acdata['ac']['weights']['W_fuel_max']['value'], units=acdata['ac']['weights']['W_fuel_max']['units'])
         
+        self.connect('descent.fuel_used_final', 'ac|weights|W_fuel_max')
+        self.set_input_defaults('ac|weights|MTOW',acdata['ac']['weights']['MTOW']['value'], units=acdata['ac']['weights']['MTOW']['units'])
+        self.set_input_defaults('ac|weights|W_fuel_max',acdata['ac']['weights']['W_fuel_max']['value'], units=acdata['ac']['weights']['W_fuel_max']['units'])
 
-def run_tbm_optimizer():
+def runTBM_SizingOpt():
     # Set up OpenMDAO to analyze the airplane
     num_nodes = 11
     prob = Problem()
-    prob.model = TBMAnalysisGroup()
+    prob.model = SizingAnalysisGroup()
     prob.model.nonlinear_solver = NewtonSolver(iprint=2)
     prob.model.options['assembled_jac_type'] = 'csc'
     prob.model.linear_solver = DirectSolver(assemble_jac=True)
@@ -172,7 +158,7 @@ def run_tbm_optimizer():
 
     prob.setup(check=True, mode='fwd')
 
-    # set some (required) mission parameters. Each pahse needs a vertical and air-speed
+    # set some (required) mission parameters. Each phase needs a vertical and air-speed
     # the entire mission needs a cruise altitude and range
     prob.set_val('climb.fltcond|vs', np.ones((num_nodes,))*1500, units='ft/min')
     prob.set_val('climb.fltcond|Ueas', np.ones((num_nodes,))*124, units='kn')
@@ -199,43 +185,15 @@ def run_tbm_optimizer():
     om.n2(prob,outfile = 'opt_test.html')
     return prob
 
-
-
 if __name__ == "__main__":
     from openconcept.utilities.visualization import plot_trajectory
     # run the analysis
-    prob = run_tbm_optimizer()
+    prob = runTBM_SizingOpt()
 
-     # print some outputs
-    # vars_list = ['ac|weights|MTOW','climb.OEW','climb.fuel_used_final','cruise.fuel_used_final','descent.fuel_used_final']
-    # units = ['lb','lb','lb','lb','lb']
-    # nice_print_names = ['MTOW', 'OEW', 'Climb fuel', 'Cruise fuel','Fuel used']
-    # print("=======================================================================")
-    # for i, thing in enumerate(vars_list):
-    #     print(nice_print_names[i]+': '+str(prob.get_val(thing,units=units[i])[0])+' '+units[i])
-
-    # plot some stuff
-    plots = False
-    if plots:
-        x_var = 'range'
-        x_unit = 'ft'
-        y_vars = ['fltcond|Ueas', 'fltcond|h', 'fuel_used']
-        y_units = ['kn', 'ft', 'lb']
-        x_label = 'Distance (ft)'
-        y_labels = ['Veas airspeed (knots)', 'Altitude (ft)', 'fuel used']
-        phases = ['v0v1', 'v1vr', 'rotate', 'v1v0']
-        plot_trajectory(prob, x_var, x_unit, y_vars, y_units, phases,
-                        x_label=x_label, y_labels=y_labels,
-                        plot_title='TBM850 Takeoff')
-
-        x_var = 'range'
-        x_unit = 'NM'
-        y_vars = ['fltcond|h','fltcond|Ueas','fuel_used','throttle','fltcond|vs']
-        y_units = ['ft','kn','lbm',None,'ft/min']
-        x_label = 'Range (nmi)'
-        y_labels = ['Altitude (ft)', 'Veas airspeed (knots)', 'Fuel used (lb)', 'Throttle setting', 'Vertical speed (ft/min)']
-        phases = ['climb', 'cruise', 'descent']
-        plot_trajectory(prob, x_var, x_unit, y_vars, y_units, phases,
-                        x_label=x_label, y_labels=y_labels, marker='-',
-                        plot_title='TBM850 Mission Profile')
-
+    # print some outputs
+    vars_list = ['ac|weights|MTOW','descent.fuel_used_final']
+    units = ['lb','lb']
+    nice_print_names = ['MTOW', 'Fuel used']
+    print("=======================================================================")
+    for i, thing in enumerate(vars_list):
+        print(nice_print_names[i]+': '+str(prob.get_val(thing,units=units[i])[0])+' '+units[i])
