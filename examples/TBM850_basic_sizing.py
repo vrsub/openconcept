@@ -45,8 +45,8 @@ class TBM850AirplaneModel(Group):
                            promotes_outputs=propulsion_promotes_outputs)
         self.connect('prop1rpm', 'propmodel.prop1.rpm')
 
-        # self.connect('propmodel.prop1.component_weight', 'W_propeller')
-        # self.connect('propmodel.eng1.component_weight', 'W_engine')
+        self.connect('propmodel.prop1.component_weight', 'W_propeller')
+        self.connect('propmodel.eng1.component_weight', 'W_engine')
 
         if flight_phase not in ['climb','descent']:
             cd0_source = 'ac|aero|polar|CD0_cruise'
@@ -119,6 +119,21 @@ class SizingAnalysisGroup(Group):
         self.add_subsystem('OEW', SingleTurboPropEmptyWeight(),
                            promotes_inputs=['*', ('P_TO', 'ac|propulsion|engine|rating')], # Is this a connection between P_TO in weights_truboprop and the engine rating in aircraft data?
                            promotes_outputs=[('OEW','ac|weights|OEW')])
+        
+        controls = self.add_subsystem('controls', IndepVarComp(), promotes_outputs=['*'])
+        controls.add_output('prop1rpm', val=np.ones((nn,))*2000, units='rpm')
+
+        # define propulsion system
+        propulsion_promotes_outputs = ['fuel_flow', 'thrust']
+        propulsion_promotes_inputs = ["fltcond|*", "ac|propulsion|*", "throttle"]
+
+        self.add_subsystem('propmodel', TurbopropPropulsionSystem(num_nodes=nn),
+                           promotes_inputs=propulsion_promotes_inputs,
+                           promotes_outputs=propulsion_promotes_outputs)
+        self.connect('prop1rpm', 'propmodel.prop1.rpm')
+
+        self.connect('propmodel.prop1.component_weight', 'W_propeller')
+        self.connect('propmodel.eng1.component_weight', 'W_engine')
         
         self.add_subsystem('MTOW', AddSubtractComp(output_name='ac|weights|MTOW',
                                                      input_names=['ac|weights|OEW', 'ac|weights|payload','ac|weights|W_fuel_max'],

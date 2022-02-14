@@ -140,8 +140,8 @@ class TBMAnalysisGroup(Group):
                            promotes_inputs=['*'])
 
         self.connect('descent.fuel_used_final', 'ac|weights|W_fuel_max')
-        # self.connect('cruise.ac|weights|OEW', 'ac|weights|OEW')
-        # self.set_input_defaults('ac|weights|MTOW',acdata['ac']['weights']['MTOW']['value'], units=acdata['ac']['weights']['MTOW']['units'])
+        self.connect('cruise.ac|weights|OEW', 'ac|weights|OEW')
+        self.set_input_defaults('ac|weights|MTOW',acdata['ac']['weights']['MTOW']['value'], units=acdata['ac']['weights']['MTOW']['units'])
         self.set_input_defaults('ac|weights|W_fuel_max',acdata['ac']['weights']['W_fuel_max']['value'], units=acdata['ac']['weights']['W_fuel_max']['units'])
         
 
