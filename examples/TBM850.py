@@ -2,6 +2,7 @@ from __future__ import division
 import sys
 import os
 import numpy as np
+import openmdao.api as om
 
 sys.path.insert(0, os.getcwd())
 from openmdao.api import Problem, Group, ScipyOptimizeDriver
@@ -165,6 +166,7 @@ def run_tbm_analysis():
     prob['rotate.throttle'] = np.ones((num_nodes)) / 1.21
 
     prob.run_model()
+    om.n2(prob)
     return prob
 
 if __name__ == "__main__":
