@@ -5,7 +5,7 @@ import numpy as np
 import openmdao.api as om
 
 sys.path.insert(0, os.getcwd())
-from openmdao.api import Problem, Group, ScipyOptimizeDriver
+from openmdao.api import Problem, Group, ScipyOptimizeDriver, pyOptSparseDriver
 from openmdao.api import DirectSolver, SqliteRecorder, IndepVarComp
 from openmdao.api import NewtonSolver, BoundsEnforceLS
 
@@ -72,6 +72,11 @@ class TBM850AirplaneModel(Group):
                                                      scaling_factors=[1,1,1, -1]),
                            promotes_inputs=['*'],
                            promotes_outputs=['weight'])
+
+def Cl_calc(weight, wing_area, Vstall):
+    rho = 1.22527
+    Cl_max = 2*weight/(rho*(Vstall*0.514444)**2*wing_area)
+    return Cl_max
 
 
 class TBMAnalysisGroup(Group):
@@ -147,16 +152,20 @@ def run_tbm_analysis():
     prob.model = TBMAnalysisGroup()
     prob.model.nonlinear_solver = NewtonSolver(iprint=2)
     prob.model.options['assembled_jac_type'] = 'csc'
+    prob.model.nonlinear_solver.options['err_on_non_converge'] = True
     prob.model.linear_solver = DirectSolver(assemble_jac=True)
     prob.model.nonlinear_solver.options['solve_subsystems'] = True
     prob.model.nonlinear_solver.options['maxiter'] = 10
-    prob.model.nonlinear_solver.options['atol'] = 1e-5
-    prob.model.nonlinear_solver.options['rtol'] = 1e-5
+    prob.model.nonlinear_solver.options['atol'] = 1e-6
+    prob.model.nonlinear_solver.options['rtol'] = 1e-6
     prob.model.nonlinear_solver.linesearch = BoundsEnforceLS(bound_enforcement='scalar', print_bound_enforce=False)
     
     # here is what I added
     #add driver and objective function
-    prob.driver = ScipyOptimizeDriver(optimizer='SLSQP')
+    prob.driver = pyOptSparseDriver(optimizer='IPOPT') 
+    prob.driver.opt_settings['limited_memory_max_history']=1000
+    prob.driver.opt_settings['tol'] = 1e-5
+    prob.driver.opt_settings['constr_viol_tol'] = 1e-6
     prob.model.add_design_var('ac|geom|wing|S_ref', lower = 5, upper=25, units='m**2')
     prob.model.add_design_var('ac|propulsion|engine|rating', lower = 500, upper=2000, units='hp', ref=800)
     prob.model.add_objective('descent.fuel_used_final')
@@ -168,12 +177,12 @@ def run_tbm_analysis():
 
     # sizing CL constraint (CL<CL_max of wing)
     prob.model.add_constraint('climb.fltcond|CL', upper=2.4476)
-    # prob.model.add_constraint('climb.fltcond|CL', upper=1.1) # climb is the only active constraint, need a stall condition on wing, some fxn(climb.fltcond|vs, climb.fltcond|Ueas), can we define max climb rate, stall depends on airfoil selection
-    prob.model.add_constraint('cruise.fltcond|CL', upper=1.3498)
-    prob.model.add_constraint('descent.fltcond|CL', upper=2.4476)
-    prob.model.add_constraint('bfl.distance_continue', upper=1000)
+    # prob.model.add_constraint('climb.fltcond|CL', upper=1.5) # climb is the only active constraint, need a stall condition on wing, some fxn(climb.fltcond|vs, climb.fltcond|Ueas), can we define max climb rate, stall depends on airfoil selection
+    prob.model.add_constraint('cruise.fltcond|CL', upper=0.7)
+    prob.model.add_constraint('descent.fltcond|CL', upper=1.4)
+    prob.model.add_constraint('rotate.range_final', upper=1000)
     prob.driver.options['debug_print'] = ['desvars','objs','nl_cons']
-    prob.driver.options['tol'] = 1e-06
+    # prob.driver.options['tol'] = 1e-06
 
     prob.setup(check=True, mode='fwd')
 
