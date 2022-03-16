@@ -5,6 +5,8 @@ from openmdao.api import Group
 from openconcept.utilities.math import AddSubtractComp, ElementMultiplyDivideComp
 import math
 
+# CHECK UNITS
+
 class HStabSizing_SmallTurboprop(ExplicitComponent):
     """Inputs: ac|geom|wing|S_ref, ac|geom|wing|MAC, ac|geom|hstab|c4_to_wing_c4
     Outputs: hstab_area
@@ -12,7 +14,7 @@ class HStabSizing_SmallTurboprop(ExplicitComponent):
 
     """
     def initialize(self):
-        self.options.declare('C_ht', default= 0.7, desc='Tail colume coefficient for vertical stabilizer, nondimensionless, single engine airplanes')
+        self.options.declare('C_ht', default= 0.9, desc='Tail colume coefficient for vertical stabilizer, nondimensionless, single engine airplanes')
 
 
     def setup(self):
@@ -41,7 +43,7 @@ class VStabSizing_SmallTurboprop(ExplicitComponent):
 
     """
     def initialize(self):
-        self.options.declare('C_vt', default= 0.04, desc='Tail colume coefficient for vertical stabilizer, nondimensionless, single engine airplanes')
+        self.options.declare('C_vt', default= 0.080, desc='Tail colume coefficient for vertical stabilizer, nondimensionless, single engine airplanes')
 
 
     def setup(self):

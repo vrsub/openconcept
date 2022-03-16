@@ -117,7 +117,7 @@ class TBMAnalysisGroup(Group):
         # dv_comp.add_output_from_dict('ac|weights|W_fuel_max')
         dv_comp.add_output_from_dict('ac|weights|MLW')
 
-        dv_comp.add_output('ac|weights|payload', val=1500, units = 'lb')
+        dv_comp.add_output('ac|weights|payload', val=849, units = 'lb')
         
 
         dv_comp.add_output_from_dict('ac|propulsion|engine|rating')
@@ -126,12 +126,6 @@ class TBMAnalysisGroup(Group):
         dv_comp.add_output_from_dict('ac|num_passengers_max')
         dv_comp.add_output_from_dict('ac|q_cruise')
 
-        # Run a full mission analysis including takeoff, climb, cruise, and descent
-        analysis = self.add_subsystem('analysis',
-                                      FullMissionAnalysis(num_nodes=nn,
-                                                          aircraft_model=TBM850AirplaneModel),
-                                      promotes_inputs=['*'], promotes_outputs=['*'])
-        
         self.add_subsystem('OEW', SingleTurboPropEmptyWeight(),
                            promotes_inputs=['*', ('P_TO', 'ac|propulsion|engine|rating')],
                            promotes_outputs=[('OEW','ac|weights|OEW')])
@@ -166,6 +160,11 @@ class TBMAnalysisGroup(Group):
         self.set_input_defaults('ac|weights|MTOW',acdata['ac']['weights']['MTOW']['value'], units=acdata['ac']['weights']['MTOW']['units'])
         self.set_input_defaults('ac|weights|W_fuel_max',acdata['ac']['weights']['W_fuel_max']['value'], units=acdata['ac']['weights']['W_fuel_max']['units'])
 
+        # Run a full mission analysis including takeoff, climb, cruise, and descent
+        analysis = self.add_subsystem('analysis',
+                                      FullMissionAnalysis(num_nodes=nn,
+                                                          aircraft_model=TBM850AirplaneModel),
+                                      promotes_inputs=['*'], promotes_outputs=['*'])
 
 def run_tbm_analysis():
     # Set up OpenMDAO to analyze the airplane
@@ -188,7 +187,7 @@ def run_tbm_analysis():
     prob.driver.opt_settings['limited_memory_max_history']=1000
     prob.driver.opt_settings['tol'] = 1e-5
     prob.driver.opt_settings['constr_viol_tol'] = 1e-6
-    prob.model.add_design_var('ac|geom|wing|S_ref', lower = 5, upper=25, units='m**2')
+    prob.model.add_design_var('ac|geom|wing|S_ref', lower = 1, upper=25, units='m**2')
     prob.model.add_design_var('ac|propulsion|engine|rating', lower = 500, upper=2000, units='hp', ref=800)
     prob.model.add_objective('descent.fuel_used_final')
 
@@ -198,11 +197,11 @@ def run_tbm_analysis():
     prob.model.add_constraint('descent.throttle', upper=1.0)
 
     # sizing CL constraint (CL<CL_max of wing)
-    prob.model.add_constraint('climb.fltcond|CL', upper=2.4476)
+    prob.model.add_constraint('climb.fltcond|CL', upper=2.00)
     # prob.model.add_constraint('climb.fltcond|CL', upper=1.5) # climb is the only active constraint, need a stall condition on wing, some fxn(climb.fltcond|vs, climb.fltcond|Ueas), can we define max climb rate, stall depends on airfoil selection
-    prob.model.add_constraint('cruise.fltcond|CL', upper=0.7)
-    prob.model.add_constraint('descent.fltcond|CL', upper=1.4)
-    # prob.model.add_constraint('rotate.range_final', upper=2000)
+    prob.model.add_constraint('cruise.fltcond|CL', upper=1.52)
+    prob.model.add_constraint('descent.fltcond|CL', upper=2.4476)
+    prob.model.add_constraint('rotate.range_final', upper=2840, units='ft')
     prob.driver.options['debug_print'] = ['desvars','objs','nl_cons']
     # prob.driver.options['tol'] = 1e-06
 
