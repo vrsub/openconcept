@@ -68,9 +68,6 @@ class WingWeight_SmallTurboprop(ExplicitComponent):
         J['W_wing','ac|geom|wing|toverc'] = 0.036 * inputs['ac|geom|wing|S_ref']**0.758 * inputs['ac|weights|W_fuel_max']**0.0035 * (inputs['ac|geom|wing|AR']/math.cos(inputs['ac|geom|wing|c4sweep'])**2)**0.6 * inputs['ac|q_cruise']**0.006 * inputs['ac|geom|wing|taper']**0.04 * -0.3 * (100*inputs['ac|geom|wing|toverc']/math.cos(inputs['ac|geom|wing|c4sweep']))**(-0.3-1) * (100/math.cos(inputs['ac|geom|wing|c4sweep'])) * (n_ult * inputs['ac|weights|MTOW'])**0.49
         J['W_wing','ac|q_cruise'] = 0.036 * inputs['ac|geom|wing|S_ref']**0.758 * inputs['ac|weights|W_fuel_max']**0.0035 * (inputs['ac|geom|wing|AR']/math.cos(inputs['ac|geom|wing|c4sweep'])**2)**0.6 * 0.006 * inputs['ac|q_cruise']**(0.006-1) * inputs['ac|geom|wing|taper']**0.04 * (100*inputs['ac|geom|wing|toverc']/math.cos(inputs['ac|geom|wing|c4sweep']))**-0.3 * (n_ult * inputs['ac|weights|MTOW'])**0.49
 
-# class EmpennageSize(ExplicitComponent):
-
-
 
 class EmpennageWeight_SmallTurboprop(ExplicitComponent):
     """Inputs: ac|geom|hstab|S_ref, ac|geom|vstab|S_ref

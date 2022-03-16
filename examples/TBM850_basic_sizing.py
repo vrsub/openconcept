@@ -205,7 +205,7 @@ def runTBM_SizingOpt():
     prob['descent.throttle'] = np.ones((num_nodes)) / 1.21
 
     prob.run_driver()
-    # om.n2(prob,outfile = 'opt_test.html')
+    om.n2(prob,outfile = 'opt_test.html')
     return prob
 
 if __name__ == "__main__":

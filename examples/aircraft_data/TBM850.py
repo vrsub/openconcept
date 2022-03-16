@@ -25,6 +25,7 @@ wing['AR']              = {'value': 8.95}
 wing['c4sweep']         = {'value': 1.0, 'units': 'deg'}
 wing['taper']           = {'value': 0.622}
 wing['toverc']          = {'value': 0.16}
+wing['MAC']             = {'value':4.97, 'units': 'ft'}
 geom['wing'] = wing
 
 fuselage = dict()

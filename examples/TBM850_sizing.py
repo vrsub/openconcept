@@ -18,6 +18,7 @@ from examples.propulsion_layouts.simple_turboprop import TurbopropPropulsionSyst
 from examples.methods.costs_commuter import OperatingCost
 from openconcept.utilities.dict_indepvarcomp import DictIndepVarComp
 from examples.aircraft_data.TBM850 import data as acdata
+from examples.sizing_turboprop import HStabSizing_SmallTurboprop, VStabSizing_SmallTurboprop, WingMAC_Trapezoidal, WingRoot_LinearTaper
 from openconcept.analysis.performance.mission_profiles import FullMissionAnalysis
 
 class TBM850AirplaneModel(Group):
@@ -78,7 +79,6 @@ def Cl_calc(weight, wing_area, Vstall):
     Cl_max = 2*weight/(rho*(Vstall*0.514444)**2*wing_area)
     return Cl_max
 
-
 class TBMAnalysisGroup(Group):
     """This is an example of a balanced field takeoff and three-phase mission analysis.
     """
@@ -99,9 +99,10 @@ class TBMAnalysisGroup(Group):
         dv_comp.add_output_from_dict('ac|geom|wing|c4sweep')
         dv_comp.add_output_from_dict('ac|geom|wing|taper')
         dv_comp.add_output_from_dict('ac|geom|wing|toverc')
-        dv_comp.add_output_from_dict('ac|geom|hstab|S_ref')
+        # dv_comp.add_output_from_dict('ac|geom|wing|MAC')
+        # dv_comp.add_output_from_dict('ac|geom|hstab|S_ref')
         dv_comp.add_output_from_dict('ac|geom|hstab|c4_to_wing_c4')
-        dv_comp.add_output_from_dict('ac|geom|vstab|S_ref')
+        # dv_comp.add_output_from_dict('ac|geom|vstab|S_ref')
         dv_comp.add_output_from_dict('ac|geom|fuselage|S_wet')
         dv_comp.add_output_from_dict('ac|geom|fuselage|width')
         dv_comp.add_output_from_dict('ac|geom|fuselage|length')
@@ -109,10 +110,15 @@ class TBMAnalysisGroup(Group):
         dv_comp.add_output_from_dict('ac|geom|nosegear|length')
         dv_comp.add_output_from_dict('ac|geom|maingear|length')
 
+        # compute hstab and vstab area using tail volume coefficient method
+
+
         # dv_comp.add_output_from_dict('ac|weights|MTOW')
-        dv_comp.add_output_from_dict('ac|weights|W_fuel_max')
+        # dv_comp.add_output_from_dict('ac|weights|W_fuel_max')
         dv_comp.add_output_from_dict('ac|weights|MLW')
-        dv_comp.add_output('ac|weights|payload', val=850, units = 'lb')
+
+        dv_comp.add_output('ac|weights|payload', val=1500, units = 'lb')
+        
 
         dv_comp.add_output_from_dict('ac|propulsion|engine|rating')
         dv_comp.add_output_from_dict('ac|propulsion|propeller|diameter')
@@ -136,11 +142,27 @@ class TBMAnalysisGroup(Group):
                                                      scaling_factors=[1,1,1]),
                            promotes_outputs=['ac|weights|MTOW'],
                            promotes_inputs=['*'])
+        
+        self.add_subsystem('Wing_Root', WingRoot_LinearTaper(),
+                            promotes_inputs=['*'],
+                            promotes_outputs=[('C_root','ac|geom|wing|root_chord')])
+        
+        self.add_subsystem('Wing_MAC', WingMAC_Trapezoidal(),
+                            promotes_inputs=['*'],
+                            promotes_outputs=[('MAC','ac|geom|wing|MAC')])
+        
+        self.add_subsystem('HStab', HStabSizing_SmallTurboprop(),
+                            promotes_inputs=['*'],
+                            promotes_outputs=[('hstab_area','ac|geom|hstab|S_ref')])
+        
+        self.add_subsystem('VStab', VStabSizing_SmallTurboprop(),
+                            promotes_inputs=['*'],
+                            promotes_outputs=[('vstab_area','ac|geom|vstab|S_ref')])
 
         self.connect('climb.propmodel.prop1.component_weight', 'W_propeller')
         self.connect('climb.propmodel.eng1.component_weight','W_engine')
 
-        # self.connect('descent.fuel_used_final', 'ac|weights|W_fuel_max')
+        self.connect('descent.fuel_used_final', 'ac|weights|W_fuel_max')
         self.set_input_defaults('ac|weights|MTOW',acdata['ac']['weights']['MTOW']['value'], units=acdata['ac']['weights']['MTOW']['units'])
         self.set_input_defaults('ac|weights|W_fuel_max',acdata['ac']['weights']['W_fuel_max']['value'], units=acdata['ac']['weights']['W_fuel_max']['units'])
 
@@ -180,7 +202,7 @@ def run_tbm_analysis():
     # prob.model.add_constraint('climb.fltcond|CL', upper=1.5) # climb is the only active constraint, need a stall condition on wing, some fxn(climb.fltcond|vs, climb.fltcond|Ueas), can we define max climb rate, stall depends on airfoil selection
     prob.model.add_constraint('cruise.fltcond|CL', upper=0.7)
     prob.model.add_constraint('descent.fltcond|CL', upper=1.4)
-    prob.model.add_constraint('rotate.range_final', upper=1000)
+    # prob.model.add_constraint('rotate.range_final', upper=2000)
     prob.driver.options['debug_print'] = ['desvars','objs','nl_cons']
     # prob.driver.options['tol'] = 1e-06
 
