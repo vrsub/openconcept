@@ -20,6 +20,7 @@ from openconcept.utilities.dict_indepvarcomp import DictIndepVarComp
 from examples.aircraft_data.TBM850 import data as acdata
 from examples.sizing_turboprop import HStabSizing_SmallTurboprop, VStabSizing_SmallTurboprop, WingMAC_Trapezoidal, WingRoot_LinearTaper
 from openconcept.analysis.performance.mission_profiles import FullMissionAnalysis
+from openconcept.analysis.openaerostruct.drag_polar import OASDragPolar
 
 class TBM850AirplaneModel(Group):
     """
@@ -51,13 +52,22 @@ class TBM850AirplaneModel(Group):
 
         # use a different drag coefficient for takeoff versus cruise
         if flight_phase not in ['v0v1', 'v1v0', 'v1vr', 'rotate']:
+            self.set_input_defaults('ac|aero|polar|CD0_cruise', 0.0125)
             cd0_source = 'ac|aero|polar|CD0_cruise'
         else:
             cd0_source = 'ac|aero|polar|CD0_TO'
-        self.add_subsystem('drag', PolarDrag(num_nodes=nn),
-                           promotes_inputs=['fltcond|CL', 'ac|geom|*', ('CD0', cd0_source),
-                                            'fltcond|q', ('e', 'ac|aero|polar|e')],
+        # self.add_subsystem('drag', PolarDrag(num_nodes=nn),
+        #                    promotes_inputs=['fltcond|CL', 'ac|geom|*', ('CD0', cd0_source),
+        #                                     'fltcond|q', ('e', 'ac|aero|polar|e')],
+        #                    promotes_outputs=['drag'])
+        
+        self.add_subsystem('drag', OASDragPolar(num_nodes=nn, num_x=5, num_y=11, num_twist=5, alpha_train=np.linspace(-10,10,10), Mach_train=np.linspace(0.1,0.6,5), alt_train=np.linspace(0, 12e3,4)),
+                           promotes_inputs=['fltcond|CL', 'ac|geom|*', ('ac|aero|CD_nonwing', cd0_source),
+                                            'fltcond|q', 'fltcond|M', 
+                                            'fltcond|h'],
                            promotes_outputs=['drag'])
+        
+        self.set_input_defaults('ac|geom|wing|twist', np.zeros(5), units='deg')
 
         # generally the weights module will be custom to each airplane
 
@@ -92,7 +102,7 @@ class TBMAnalysisGroup(Group):
         dv_comp.add_output_from_dict('ac|aero|CLmax_TO')
         dv_comp.add_output_from_dict('ac|aero|polar|e')
         dv_comp.add_output_from_dict('ac|aero|polar|CD0_TO')
-        dv_comp.add_output_from_dict('ac|aero|polar|CD0_cruise')
+        # dv_comp.add_output_from_dict('ac|aero|polar|CD0_cruise')
 
         dv_comp.add_output_from_dict('ac|geom|wing|S_ref')
         dv_comp.add_output_from_dict('ac|geom|wing|AR')
@@ -126,17 +136,6 @@ class TBMAnalysisGroup(Group):
         dv_comp.add_output_from_dict('ac|num_passengers_max')
         dv_comp.add_output_from_dict('ac|q_cruise')
 
-        self.add_subsystem('OEW', SingleTurboPropEmptyWeight(),
-                           promotes_inputs=['*', ('P_TO', 'ac|propulsion|engine|rating')],
-                           promotes_outputs=[('OEW','ac|weights|OEW')])
-        
-        self.add_subsystem('MTOW', AddSubtractComp(output_name='ac|weights|MTOW',
-                                                     input_names=['ac|weights|OEW', 'ac|weights|payload','ac|weights|W_fuel_max'],
-                                                     units='kg', vec_size=[1,1,1],
-                                                     scaling_factors=[1,1,1]),
-                           promotes_outputs=['ac|weights|MTOW'],
-                           promotes_inputs=['*'])
-        
         self.add_subsystem('Wing_Root', WingRoot_LinearTaper(),
                             promotes_inputs=['*'],
                             promotes_outputs=[('C_root','ac|geom|wing|root_chord')])
@@ -152,7 +151,18 @@ class TBMAnalysisGroup(Group):
         self.add_subsystem('VStab', VStabSizing_SmallTurboprop(),
                             promotes_inputs=['*'],
                             promotes_outputs=[('vstab_area','ac|geom|vstab|S_ref')])
-
+        
+        self.add_subsystem('OEW', SingleTurboPropEmptyWeight(),
+                           promotes_inputs=['*', ('P_TO', 'ac|propulsion|engine|rating')],
+                           promotes_outputs=[('OEW','ac|weights|OEW')])
+        
+        self.add_subsystem('MTOW', AddSubtractComp(output_name='ac|weights|MTOW',
+                                                     input_names=['ac|weights|OEW', 'ac|weights|payload','ac|weights|W_fuel_max'],
+                                                     units='kg', vec_size=[1,1,1],
+                                                     scaling_factors=[1,1,1]),
+                           promotes_outputs=['ac|weights|MTOW'],
+                           promotes_inputs=['*'])
+        
         self.connect('climb.propmodel.prop1.component_weight', 'W_propeller')
         self.connect('climb.propmodel.eng1.component_weight','W_engine')
 
@@ -173,7 +183,7 @@ def run_tbm_analysis():
     prob.model = TBMAnalysisGroup()
     prob.model.nonlinear_solver = NewtonSolver(iprint=2)
     prob.model.options['assembled_jac_type'] = 'csc'
-    prob.model.nonlinear_solver.options['err_on_non_converge'] = True
+    prob.model.nonlinear_solver.options['err_on_non_converge'] = False
     prob.model.linear_solver = DirectSolver(assemble_jac=True)
     prob.model.nonlinear_solver.options['solve_subsystems'] = True
     prob.model.nonlinear_solver.options['maxiter'] = 10
@@ -185,10 +195,11 @@ def run_tbm_analysis():
     #add driver and objective function
     prob.driver = pyOptSparseDriver(optimizer='IPOPT') 
     prob.driver.opt_settings['limited_memory_max_history']=1000
-    prob.driver.opt_settings['tol'] = 1e-5
+    prob.driver.opt_settings['tol'] = 1e-6
     prob.driver.opt_settings['constr_viol_tol'] = 1e-6
     prob.model.add_design_var('ac|geom|wing|S_ref', lower = 1, upper=25, units='m**2')
     prob.model.add_design_var('ac|propulsion|engine|rating', lower = 500, upper=2000, units='hp', ref=800)
+    # prob.model.add_design_var('ac|geom|wing|c4sweep', lower = 0, upper=45, units='deg')
     prob.model.add_objective('descent.fuel_used_final')
 
     # sizing throttle constraints
@@ -231,6 +242,7 @@ def run_tbm_analysis():
     prob['rotate.throttle'] = np.ones((num_nodes)) / 1.21
 
     prob.run_driver()
+    print(prob.get_val('cruise.drag'))
     om.n2(prob,outfile = 'full_mission_sizing.html')
     return prob
 

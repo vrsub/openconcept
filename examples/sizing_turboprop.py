@@ -1,11 +1,10 @@
 from __future__ import division
+from matplotlib import units
 import numpy as np
 from openmdao.api import ExplicitComponent, IndepVarComp
 from openmdao.api import Group
 from openconcept.utilities.math import AddSubtractComp, ElementMultiplyDivideComp
 import math
-
-# CHECK UNITS
 
 class HStabSizing_SmallTurboprop(ExplicitComponent):
     """Inputs: ac|geom|wing|S_ref, ac|geom|wing|MAC, ac|geom|hstab|c4_to_wing_c4
@@ -102,3 +101,6 @@ class WingMAC_Trapezoidal(ExplicitComponent):
     def compute_partials(self, inputs, J):
         J['MAC','ac|geom|wing|root_chord'] = (2/3)*(1+inputs['ac|geom|wing|taper']+inputs['ac|geom|wing|taper']**2)/(1+inputs['ac|geom|wing|taper'])
         J['MAC', 'ac|geom|wing|taper'] = (2/3)*inputs['ac|geom|wing|root_chord']*(2*inputs['ac|geom|wing|taper']+1)/(inputs['ac|geom|wing|taper']+1) - (2/3)*inputs['ac|geom|wing|root_chord']*(1+inputs['ac|geom|wing|taper']+inputs['ac|geom|wing|taper']**2)/(1+inputs['ac|geom|wing|taper'])**2
+
+
+
