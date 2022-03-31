@@ -18,8 +18,9 @@ from examples.propulsion_layouts.simple_turboprop import TurbopropPropulsionSyst
 from examples.methods.costs_commuter import OperatingCost
 from openconcept.utilities.dict_indepvarcomp import DictIndepVarComp
 from examples.aircraft_data.TBM850 import data as acdata
-from examples.sizing_turboprop import HStabSizing_SmallTurboprop, VStabSizing_SmallTurboprop, WingMAC_Trapezoidal, WingRoot_LinearTaper
+from examples.sizing_functions import HStabSizing_SmallTurboprop, VStabSizing_SmallTurboprop, WingMAC_Trapezoidal, WingRoot_LinearTaper
 from openconcept.analysis.performance.mission_profiles import FullMissionAnalysis
+from openconcept.analysis.performance.mission_profiles import FullMissionWithReserve
 from openconcept.analysis.openaerostruct.drag_polar import OASDragPolar
 
 class TBM850AirplaneModel(Group):
@@ -52,22 +53,23 @@ class TBM850AirplaneModel(Group):
 
         # use a different drag coefficient for takeoff versus cruise
         if flight_phase not in ['v0v1', 'v1v0', 'v1vr', 'rotate']:
-            self.set_input_defaults('ac|aero|polar|CD0_cruise', 0.0125)
+            # self.set_input_defaults('ac|aero|polar|CD0_cruise', 0.0125)
             cd0_source = 'ac|aero|polar|CD0_cruise'
         else:
             cd0_source = 'ac|aero|polar|CD0_TO'
-        # self.add_subsystem('drag', PolarDrag(num_nodes=nn),
-        #                    promotes_inputs=['fltcond|CL', 'ac|geom|*', ('CD0', cd0_source),
-        #                                     'fltcond|q', ('e', 'ac|aero|polar|e')],
-        #                    promotes_outputs=['drag'])
-        
-        self.add_subsystem('drag', OASDragPolar(num_nodes=nn, num_x=5, num_y=11, num_twist=5, alpha_train=np.linspace(-10,10,10), Mach_train=np.linspace(0.1,0.6,5), alt_train=np.linspace(0, 12e3,4)),
-                           promotes_inputs=['fltcond|CL', 'ac|geom|*', ('ac|aero|CD_nonwing', cd0_source),
-                                            'fltcond|q', 'fltcond|M', 
-                                            'fltcond|h'],
+
+        self.add_subsystem('drag', PolarDrag(num_nodes=nn),
+                           promotes_inputs=['fltcond|CL', 'ac|geom|*', ('CD0', cd0_source),
+                                            'fltcond|q', ('e', 'ac|aero|polar|e')],
                            promotes_outputs=['drag'])
         
-        self.set_input_defaults('ac|geom|wing|twist', np.zeros(5), units='deg')
+        # self.add_subsystem('drag', OASDragPolar(num_nodes=nn, num_x=5, num_y=11, num_twist=5, alpha_train=np.linspace(-10,10,5), Mach_train=np.linspace(0.1,0.6,5), alt_train=np.linspace(0, 12e3,4)),
+        #                    promotes_inputs=['fltcond|CL', 'ac|geom|*', ('ac|aero|CD_nonwing', cd0_source),
+        #                                     'fltcond|q', 'fltcond|M', 
+        #                                     'fltcond|h'],
+        #                    promotes_outputs=['drag'])
+        
+        # self.set_input_defaults('ac|geom|wing|twist', np.zeros(5), units='deg')
 
         # generally the weights module will be custom to each airplane
 
@@ -136,6 +138,9 @@ class TBMAnalysisGroup(Group):
         dv_comp.add_output_from_dict('ac|num_passengers_max')
         dv_comp.add_output_from_dict('ac|q_cruise')
 
+        self.connect('climb.propmodel.prop1.component_weight', 'W_propeller')
+        self.connect('climb.propmodel.eng1.component_weight','W_engine')
+
         self.add_subsystem('Wing_Root', WingRoot_LinearTaper(),
                             promotes_inputs=['*'],
                             promotes_outputs=[('C_root','ac|geom|wing|root_chord')])
@@ -162,17 +167,14 @@ class TBMAnalysisGroup(Group):
                                                      scaling_factors=[1,1,1]),
                            promotes_outputs=['ac|weights|MTOW'],
                            promotes_inputs=['*'])
-        
-        self.connect('climb.propmodel.prop1.component_weight', 'W_propeller')
-        self.connect('climb.propmodel.eng1.component_weight','W_engine')
 
-        self.connect('descent.fuel_used_final', 'ac|weights|W_fuel_max')
+        self.connect('reserve_descent.fuel_used_final', 'ac|weights|W_fuel_max')
         self.set_input_defaults('ac|weights|MTOW',acdata['ac']['weights']['MTOW']['value'], units=acdata['ac']['weights']['MTOW']['units'])
         self.set_input_defaults('ac|weights|W_fuel_max',acdata['ac']['weights']['W_fuel_max']['value'], units=acdata['ac']['weights']['W_fuel_max']['units'])
 
         # Run a full mission analysis including takeoff, climb, cruise, and descent
         analysis = self.add_subsystem('analysis',
-                                      FullMissionAnalysis(num_nodes=nn,
+                                      FullMissionWithReserve(num_nodes=nn,
                                                           aircraft_model=TBM850AirplaneModel),
                                       promotes_inputs=['*'], promotes_outputs=['*'])
 
@@ -186,10 +188,10 @@ def run_tbm_analysis():
     prob.model.nonlinear_solver.options['err_on_non_converge'] = False
     prob.model.linear_solver = DirectSolver(assemble_jac=True)
     prob.model.nonlinear_solver.options['solve_subsystems'] = True
-    prob.model.nonlinear_solver.options['maxiter'] = 10
+    prob.model.nonlinear_solver.options['maxiter'] = 50
     prob.model.nonlinear_solver.options['atol'] = 1e-6
     prob.model.nonlinear_solver.options['rtol'] = 1e-6
-    prob.model.nonlinear_solver.linesearch = BoundsEnforceLS(bound_enforcement='scalar', print_bound_enforce=False)
+    prob.model.nonlinear_solver.linesearch = BoundsEnforceLS(bound_enforcement='scalar', print_bound_enforce=True)
     
     # here is what I added
     #add driver and objective function
@@ -226,6 +228,14 @@ def run_tbm_analysis():
     prob.set_val('cruise.fltcond|Ueas', np.ones((num_nodes,))*201, units='kn')
     prob.set_val('descent.fltcond|vs', np.ones((num_nodes,))*(-600), units='ft/min')
     prob.set_val('descent.fltcond|Ueas', np.ones((num_nodes,))*140, units='kn')
+    prob.set_val('reserve_climb.fltcond|vs', np.ones((num_nodes,))*1500, units='ft/min')
+    prob.set_val('reserve_climb.fltcond|Ueas', np.ones((num_nodes,))*124, units='kn')
+    prob.set_val('reserve_cruise.fltcond|vs', np.ones((num_nodes,))*0.01, units='ft/min')
+    prob.set_val('reserve_cruise.fltcond|Ueas', np.ones((num_nodes,))*201, units='kn')
+    prob.set_val('reserve_descent.fltcond|vs', np.ones((num_nodes,))*(-600), units='ft/min')
+    prob.set_val('reserve_descent.fltcond|Ueas', np.ones((num_nodes,))*140, units='kn')
+    prob.set_val('loiter.fltcond|vs', np.linspace(0.0, 0.0, num_nodes), units='ft/min')
+    prob.set_val('loiter.fltcond|Ueas', np.ones((num_nodes,)) * 100, units='kn')
 
     prob.set_val('cruise|h0',28000.,units='ft')
     prob.set_val('mission_range',1250,units='NM')
@@ -241,7 +251,7 @@ def run_tbm_analysis():
     prob['v1vr.throttle'] = np.ones((num_nodes)) / 1.21
     prob['rotate.throttle'] = np.ones((num_nodes)) / 1.21
 
-    prob.run_driver()
+    prob.run_model()
     print(prob.get_val('cruise.drag'))
     om.n2(prob,outfile = 'full_mission_sizing.html')
     return prob

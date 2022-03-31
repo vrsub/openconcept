@@ -11,6 +11,7 @@ from openconcept.analysis.aerodynamics import PolarDrag
 from examples.aircraft_data.B738 import data as acdata
 from openconcept.analysis.performance.mission_profiles import MissionWithReserve
 from openconcept.components.cfm56 import CFM56
+from examples.sizing_functions import HStabSizing_SmallTurboprop, VStabSizing_SmallTurboprop, WingMAC_Trapezoidal, WingRoot_LinearTaper
 
 class B738AirplaneModel(oc.IntegratorGroup):
     """
