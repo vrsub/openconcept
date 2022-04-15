@@ -30,10 +30,18 @@ geom['wing'] = wing
 hstab = dict()
 hstab['S_ref']          = {'value': 32.78, 'units': 'm**2'}
 hstab['c4_to_wing_c4']  = {'value': 17.9, 'units': 'm'}
+hstab['AR']             = {'value': 6.16} # This was added for component weight calculation
+hstab['taper']          = {'value': 0.203} # This was added for component weight calculation
+hstab['c4sweep']        = {'value': 30, 'units':'deg'} # This was added for component weight calculation
 geom['hstab'] = hstab
 
 vstab = dict()
 vstab['S_ref']          = {'value': 26.44, 'units': 'm**2'}
+
+# This following lines were added for component weight calculation
+vstab['c4sweep']        = {'value': 35, 'units': 'deg'}
+vstab['AR']             = {'value': 1.94}
+vstab['toverc']         = {'value': 0.12}
 geom['vstab'] = vstab
 
 nosegear = dict()

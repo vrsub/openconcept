@@ -31,7 +31,6 @@ class WingWeight_SmallTurboprop(ExplicitComponent):
         #self.add_input('V_H', units='kn', desc='Max sea-level speed')
         self.add_input('ac|q_cruise', units='lb*ft**-2')
 
-
         #self.add_output('heat_out', units='W', desc='Waste heat out',shape=(nn,))
         self.add_output('W_wing', units='lb', desc='Wing weight')
 
