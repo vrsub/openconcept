@@ -1,4 +1,5 @@
 from __future__ import division
+from pickle import TRUE
 import sys
 import os
 import numpy as np
@@ -9,9 +10,11 @@ import openconcept.api as oc
 # imports for the airplane model itself
 from openconcept.analysis.aerodynamics import PolarDrag
 from examples.aircraft_data.B738 import data as acdata
-from openconcept.analysis.performance.mission_profiles import MissionWithReserve
+from openconcept.analysis.performance.mission_profiles import FullMissionWithReserve, MissionWithReserve, FullMissionAnalysis, BasicMission
 from openconcept.components.cfm56 import CFM56
-from examples.sizing_functions import HStabSizing_SmallTurboprop, VStabSizing_SmallTurboprop, WingMAC_Trapezoidal, WingRoot_LinearTaper
+from examples.sizing_functions import HStabSizing_JetTransport, VStabSizing_JetTransport, WingMAC_Trapezoidal, WingRoot_LinearTaper
+from examples.methods.weights_jettransport import JetTransportEmptyWeight
+from examples.methods.drag_buildup import CleanParasiticDrag_JetTransport
 
 class B738AirplaneModel(oc.IntegratorGroup):
     """
@@ -61,14 +64,14 @@ class B738AirplaneModel(oc.IntegratorGroup):
                            promotes_outputs=['drag'])
 
         # generally the weights module will be custom to each airplane
-        passthru = om.ExecComp('OEW=x',
-                  x={'val': 1.0,
-                     'units': 'kg'},
-                  OEW={'val': 1.0,
-                       'units': 'kg'})
-        self.add_subsystem('OEW', passthru,
-                           promotes_inputs=[('x', 'ac|weights|OEW')],
-                           promotes_outputs=['OEW'])
+        # passthru = om.ExecComp('OEW=x',
+        #           x={'val': 1.0,
+        #              'units': 'kg'},
+        #           OEW={'val': 1.0,
+        #                'units': 'kg'})
+        # self.add_subsystem('OEW', passthru,
+        #                    promotes_inputs=[('x', 'ac|weights|OEW')],
+        #                    promotes_outputs=['OEW'])
 
         self.add_subsystem('weight', oc.AddSubtractComp(output_name='weight',
                                                      input_names=['ac|weights|MTOW', 'fuel_used'],
@@ -88,35 +91,86 @@ class B738AnalysisGroup(om.Group):
         dv_comp.add_output_from_dict('ac|aero|CLmax_TO')
         dv_comp.add_output_from_dict('ac|aero|polar|e')
         dv_comp.add_output_from_dict('ac|aero|polar|CD0_TO')
-        dv_comp.add_output_from_dict('ac|aero|polar|CD0_cruise')
+        # dv_comp.add_output_from_dict('ac|aero|polar|CD0_cruise')
+        dv_comp.add_output_from_dict('ac|aero|Vstall_land')
+        dv_comp.add_output_from_dict('ac|aero|LoverD')
 
         dv_comp.add_output_from_dict('ac|geom|wing|S_ref')
         dv_comp.add_output_from_dict('ac|geom|wing|AR')
         dv_comp.add_output_from_dict('ac|geom|wing|c4sweep')
         dv_comp.add_output_from_dict('ac|geom|wing|taper')
         dv_comp.add_output_from_dict('ac|geom|wing|toverc')
-        dv_comp.add_output_from_dict('ac|geom|hstab|S_ref')
+        # dv_comp.add_output_from_dict('ac|geom|hstab|S_ref')
         dv_comp.add_output_from_dict('ac|geom|hstab|c4_to_wing_c4')
-        dv_comp.add_output_from_dict('ac|geom|vstab|S_ref')
+        dv_comp.add_output_from_dict('ac|geom|hstab|AR')
+        dv_comp.add_output_from_dict('ac|geom|hstab|c4sweep')
+        dv_comp.add_output_from_dict('ac|geom|hstab|taper')
+        # dv_comp.add_output_from_dict('ac|geom|vstab|S_ref')
+        dv_comp.add_output_from_dict('ac|geom|vstab|AR')
+        dv_comp.add_output_from_dict('ac|geom|vstab|toverc')
+        dv_comp.add_output_from_dict('ac|geom|vstab|c4sweep')
+
+        dv_comp.add_output_from_dict('ac|geom|fuselage|S_wet')
+        dv_comp.add_output_from_dict('ac|geom|fuselage|length')
+        dv_comp.add_output_from_dict('ac|geom|fuselage|width')
+        dv_comp.add_output_from_dict('ac|geom|fuselage|height')
 
         dv_comp.add_output_from_dict('ac|geom|nosegear|length')
+        dv_comp.add_output_from_dict('ac|geom|nosegear|n_wheels')
         dv_comp.add_output_from_dict('ac|geom|maingear|length')
+        dv_comp.add_output_from_dict('ac|geom|maingear|n_wheels')
 
-        dv_comp.add_output_from_dict('ac|weights|MTOW')
-        dv_comp.add_output_from_dict('ac|weights|W_fuel_max')
+        # dv_comp.add_output_from_dict('ac|weights|MTOW')
+        # dv_comp.add_output_from_dict('ac|weights|W_fuel_max')
         dv_comp.add_output_from_dict('ac|weights|MLW')
-        dv_comp.add_output_from_dict('ac|weights|OEW')
+        # dv_comp.add_output_from_dict('ac|weights|OEW')
 
         dv_comp.add_output_from_dict('ac|propulsion|engine|rating')
+        dv_comp.add_output_from_dict('ac|propulsion|engine|BPR')
 
         dv_comp.add_output_from_dict('ac|num_passengers_max')
         dv_comp.add_output_from_dict('ac|q_cruise')
+
+        self.add_subsystem('cd0_estimation', CleanParasiticDrag_JetTransport(),
+                            promotes_inputs=['*'],
+                            promotes_outputs=[('C_d0','ac|aero|polar|CD0_cruise')])
+
+        self.add_subsystem('Wing_Root', WingRoot_LinearTaper(),
+                            promotes_inputs=['*'],
+                            promotes_outputs=[('C_root','ac|geom|wing|root_chord')])
+        
+        self.add_subsystem('Wing_MAC', WingMAC_Trapezoidal(),
+                            promotes_inputs=['*'],
+                            promotes_outputs=[('MAC','ac|geom|wing|MAC')])
+        
+        self.add_subsystem('HStab', HStabSizing_JetTransport(),
+                            promotes_inputs=['*'],
+                            promotes_outputs=[('hstab_area','ac|geom|hstab|S_ref')])
+        
+        self.add_subsystem('VStab', VStabSizing_JetTransport(),
+                            promotes_inputs=['*'],
+                            promotes_outputs=[('vstab_area','ac|geom|vstab|S_ref')])
+
+        self.add_subsystem('OEW', JetTransportEmptyWeight(),
+                           promotes_inputs=['*'],
+                           promotes_outputs=[('OEW','ac|weights|OEW'),('W_engine','ac|propulsion|engine|weight')])
+        
+        self.add_subsystem('MTOW', oc.AddSubtractComp(output_name='ac|weights|MTOW',
+                                                     input_names=['ac|weights|OEW', 'ac|weights|W_fuel_max'],
+                                                     units='kg', vec_size=[1,1],
+                                                     scaling_factors=[1,1]),
+                           promotes_outputs=['ac|weights|MTOW'],
+                           promotes_inputs=['*'])
 
         # Run a full mission analysis including takeoff, reserve_, cruise,reserve_ and descereserve_nt
         analysis = self.add_subsystem('analysis',
                                       MissionWithReserve(num_nodes=nn,
                                                           aircraft_model=B738AirplaneModel),
                                       promotes_inputs=['*'], promotes_outputs=['*'])
+        
+        self.connect('loiter.fuel_used_final', 'ac|weights|W_fuel_max')
+        self.set_input_defaults('ac|weights|MTOW',acdata['ac']['weights']['MTOW']['value'], units=acdata['ac']['weights']['MTOW']['units'])
+        self.set_input_defaults('ac|weights|W_fuel_max',acdata['ac']['weights']['W_fuel_max']['value'], units=acdata['ac']['weights']['W_fuel_max']['units'])
 
 def configure_problem():
     prob = om.Problem()
@@ -126,7 +180,7 @@ def configure_problem():
     prob.model.nonlinear_solver.options['maxiter'] = 20
     prob.model.nonlinear_solver.options['atol'] = 1e-6
     prob.model.nonlinear_solver.options['rtol'] = 1e-6
-    prob.model.nonlinear_solver.linesearch = om.BoundsEnforceLS(bound_enforcement='scalar', print_bound_enforce=False)
+    prob.model.nonlinear_solver.linesearch = om.BoundsEnforceLS(bound_enforcement='scalar', print_bound_enforce=True)
     return prob
 
 def set_values(prob, num_nodes):
@@ -150,11 +204,16 @@ def set_values(prob, num_nodes):
     prob.set_val('reserve|h0',15000.,units='ft')
     prob.set_val('mission_range',2050,units='NM')
 
+    # prob.set_val('v0v1.fltcond|Utrue',np.ones((num_nodes))*50,units='kn')
+    # prob.set_val('v1vr.fltcond|Utrue',np.ones((num_nodes))*85,units='kn')
+    # prob.set_val('v1v0.fltcond|Utrue',np.ones((num_nodes))*85,units='kn')
+
+
 def show_outputs(prob):
     # print some outputs
-    vars_list = ['descent.fuel_used_final','loiter.fuel_used_final']
+    vars_list = ['descent.fuel_used_final']
     units = ['lb','lb']
-    nice_print_names = ['Block fuel', 'Total fuel']
+    nice_print_names = ['Block fuel']
     print("=======================================================================")
     for i, thing in enumerate(vars_list):
         print(nice_print_names[i]+': '+str(prob.get_val(thing,units=units[i])[0])+' '+units[i])
@@ -173,17 +232,18 @@ def show_outputs(prob):
                         x_label=x_label, y_labels=y_labels, marker='-',
                         plot_title='737-800 Mission Profile')
 
-def run_738_analysis(plots=False):
+def run_738_analysis(plots=True):
     num_nodes = 11
     prob = configure_problem()
     prob.setup(check=True, mode='fwd')
     set_values(prob, num_nodes)
     prob.run_model()
     prob.model.list_outputs()
+    om.n2(prob,outfile = 'full_mission_sizing.html')    
     if plots:
         show_outputs(prob)
     return prob
 
 
 if __name__ == "__main__":
-    run_738_analysis(plots=True)    
+    run_738_analysis(plots=True)

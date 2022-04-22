@@ -52,22 +52,22 @@ class TBM850AirplaneModel(Group):
 
         # use a different drag coefficient for takeoff versus cruise
         if flight_phase not in ['v0v1', 'v1v0', 'v1vr', 'rotate']:
-            self.set_input_defaults('ac|aero|polar|CD0_cruise', 0.0125)
+            # self.set_input_defaults('ac|aero|polar|CD0_cruise', 0.0125)
             cd0_source = 'ac|aero|polar|CD0_cruise'
         else:
             cd0_source = 'ac|aero|polar|CD0_TO'
-        # self.add_subsystem('drag', PolarDrag(num_nodes=nn),
-        #                    promotes_inputs=['fltcond|CL', 'ac|geom|*', ('CD0', cd0_source),
-        #                                     'fltcond|q', ('e', 'ac|aero|polar|e')],
-        #                    promotes_outputs=['drag'])
-
-        self.add_subsystem('drag', OASDragPolar(num_nodes=nn, num_x=5, num_y=11, num_twist=5, alpha_train=np.linspace(-10,10,5), Mach_train=np.linspace(0.1,0.6,5), alt_train=np.linspace(0, 12e3,4)),
-                           promotes_inputs=['fltcond|CL', 'ac|geom|*', ('ac|aero|CD_nonwing', cd0_source),
-                                            'fltcond|q', 'fltcond|M', 
-                                            'fltcond|h'],
+        self.add_subsystem('drag', PolarDrag(num_nodes=nn),
+                           promotes_inputs=['fltcond|CL', 'ac|geom|*', ('CD0', cd0_source),
+                                            'fltcond|q', ('e', 'ac|aero|polar|e')],
                            promotes_outputs=['drag'])
+
+        # self.add_subsystem('drag', OASDragPolar(num_nodes=nn, num_x=5, num_y=11, num_twist=5, alpha_train=np.linspace(-10,10,5), Mach_train=np.linspace(0.1,0.6,3), alt_train=np.linspace(0, 12e3,4)),
+        #                    promotes_inputs=['fltcond|CL', 'ac|geom|*', ('ac|aero|CD_nonwing', cd0_source),
+        #                                     'fltcond|q', 'fltcond|M', 
+        #                                     'fltcond|h'],
+        #                    promotes_outputs=['drag'])
         
-        self.set_input_defaults('ac|geom|wing|twist', np.zeros(5), units='deg')
+        # self.set_input_defaults('ac|geom|wing|twist', np.zeros(5), units='deg')
 
         # generally the weights module will be custom to each airplane
 
@@ -104,6 +104,7 @@ class TBMAnalysisGroup(Group):
         dv_comp.add_output_from_dict('ac|aero|polar|e')
         dv_comp.add_output_from_dict('ac|aero|polar|CD0_TO')
         dv_comp.add_output_from_dict('ac|aero|polar|CD0_cruise')
+        dv_comp.add_output_from_dict('ac|aero|Vstall_land')
 
         dv_comp.add_output_from_dict('ac|geom|wing|S_ref')
         dv_comp.add_output_from_dict('ac|geom|wing|AR')
@@ -164,11 +165,11 @@ class TBMAnalysisGroup(Group):
                            promotes_inputs=['*'])
         
         analysis = self.add_subsystem('analysis',
-                                      FullMissionAnalysis(num_nodes=nn,
+                                      FullMissionWithReserve(num_nodes=nn,
                                                           aircraft_model=TBM850AirplaneModel),
                                       promotes_inputs=['*'], promotes_outputs=['*'])
 
-        self.connect('descent.fuel_used_final', 'ac|weights|W_fuel_max')
+        self.connect('loiter.fuel_used_final', 'ac|weights|W_fuel_max')
         self.set_input_defaults('ac|weights|MTOW',acdata['ac']['weights']['MTOW']['value'], units=acdata['ac']['weights']['MTOW']['units'])
         self.set_input_defaults('ac|weights|W_fuel_max',acdata['ac']['weights']['W_fuel_max']['value'], units=acdata['ac']['weights']['W_fuel_max']['units'])
 
@@ -194,10 +195,11 @@ def run_tbm_analysis():
     prob.driver.opt_settings['limited_memory_max_history']=1000
     prob.driver.opt_settings['tol'] = 1e-5
     prob.driver.opt_settings['constr_viol_tol'] = 1e-6
-    prob.model.add_design_var('ac|geom|wing|S_ref', lower = 5, upper=25, units='m**2')
+    prob.model.add_design_var('ac|geom|wing|S_ref', lower = 12, upper=25, units='m**2')
     prob.model.add_design_var('ac|propulsion|engine|rating', lower = 500, upper=2000, units='hp', ref=800)
-    prob.model.add_design_var('ac|geom|wing|c4sweep', lower = -2, upper=10, units='deg', ref=1)
-    prob.model.add_design_var('ac|geom|wing|AR', lower = 1, upper=20, ref=8.95)
+    # prob.model.add_design_var('ac|geom|wing|c4sweep', lower = -2, upper=10, units='deg', ref=1)
+    # prob.model.add_design_var('ac|geom|wing|twist', lower = np.array([0,-5,-5,-5,-5]), upper=np.array([0,5,5,5,5]), units='deg', ref=1)
+    # prob.model.add_design_var('ac|geom|wing|AR', lower = 8, upper=20, ref=8.95)
     prob.model.add_objective('descent.fuel_used_final')
 
     # sizing throttle constraints
@@ -211,6 +213,7 @@ def run_tbm_analysis():
     prob.model.add_constraint('cruise.fltcond|CL', upper=0.7)
     prob.model.add_constraint('descent.fltcond|CL', upper=1.4)
     prob.model.add_constraint('rotate.range_final', upper=1000)
+    prob.model.add_constraint('v1v0.range_final', upper=1000)
     prob.driver.options['debug_print'] = ['desvars','objs','nl_cons']
     # prob.driver.options['tol'] = 1e-06
 
@@ -224,6 +227,14 @@ def run_tbm_analysis():
     prob.set_val('cruise.fltcond|Ueas', np.ones((num_nodes,))*201, units='kn')
     prob.set_val('descent.fltcond|vs', np.ones((num_nodes,))*(-600), units='ft/min')
     prob.set_val('descent.fltcond|Ueas', np.ones((num_nodes,))*140, units='kn')
+    prob.set_val('reserve_climb.fltcond|vs', np.ones((num_nodes,))*1500, units='ft/min')
+    prob.set_val('reserve_climb.fltcond|Ueas', np.ones((num_nodes,))*124, units='kn')
+    prob.set_val('reserve_cruise.fltcond|vs', np.ones((num_nodes,))*0.01, units='ft/min')
+    prob.set_val('reserve_cruise.fltcond|Ueas', np.ones((num_nodes,))*201, units='kn')
+    prob.set_val('reserve_descent.fltcond|vs', np.ones((num_nodes,))*(-600), units='ft/min')
+    prob.set_val('reserve_descent.fltcond|Ueas', np.ones((num_nodes,))*140, units='kn')
+    prob.set_val('loiter.fltcond|vs', np.linspace(0.0, 0.0, num_nodes), units='ft/min')
+    prob.set_val('loiter.fltcond|Ueas', np.ones((num_nodes,)) * 100, units='kn')
 
     prob.set_val('cruise|h0',28000.,units='ft')
     prob.set_val('mission_range',1250,units='NM')
@@ -240,7 +251,7 @@ def run_tbm_analysis():
     prob['rotate.throttle'] = np.ones((num_nodes)) / 1.21
 
     prob.run_driver()
-    om.n2(prob,outfile = 'full_mission_sizing.html')
+    # om.n2(prob,outfile = 'full_mission_sizing.html')
     return prob
 
 if __name__ == "__main__":
@@ -249,7 +260,7 @@ if __name__ == "__main__":
     prob = run_tbm_analysis()
 
      # print some outputs
-    vars_list = ['ac|weights|MTOW','descent.fuel_used_final']
+    vars_list = ['ac|weights|MTOW','loiter.fuel_used_final']
     units = ['lb','lb']
     nice_print_names = ['MTOW', 'Fuel used']
     print("=======================================================================")

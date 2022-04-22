@@ -8,6 +8,8 @@ ac = dict()
 # ==AERO==================================
 aero = dict()
 aero['CLmax_TO']   = {'value' : 2.0}
+aero['LoverD']     = {'value': 17}
+aero['Vstall_land'] = {'value': 110, 'units':'kn'}
 
 polar = dict()
 polar['e']              = {'value' : 0.801}
@@ -46,11 +48,20 @@ geom['vstab'] = vstab
 
 nosegear = dict()
 nosegear['length'] = {'value': 3, 'units': 'ft'}
+nosegear['n_wheels'] = {'value': 2}
 geom['nosegear'] = nosegear
 
 maingear = dict()
 maingear['length'] = {'value': 4, 'units': 'ft'}
+maingear['n_wheels'] = {'value': 4}
 geom['maingear'] = maingear
+
+fuselage = dict()
+fuselage['S_wet']       = {'value': 1077, 'units': 'm**2'}
+fuselage['width']       = {'value': 3.76, 'units': 'm'}
+fuselage['length']      = {'value': 39.12, 'units': 'm'}
+fuselage['height']      = {'value': 4.01, 'units': 'm'}
+geom['fuselage'] = fuselage
 
 ac['geom'] = geom
 
@@ -67,6 +78,8 @@ ac['weights'] = weights
 propulsion = dict()
 engine = dict()
 engine['rating']        = {'value': 27000, 'units': 'lbf'}
+engine['BPR']           = {'value': 11}
+engine['weight']           = {'value': 5000, 'units':'lb'}
 propulsion['engine']    = engine
 
 ac['propulsion'] = propulsion

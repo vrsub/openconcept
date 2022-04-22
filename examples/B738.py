@@ -179,6 +179,7 @@ def run_738_analysis(plots=False):
     prob.setup(check=True, mode='fwd')
     set_values(prob, num_nodes)
     prob.run_model()
+    om.n2(prob,outfile = 'B738.html')
     prob.model.list_outputs()
     if plots:
         show_outputs(prob)
