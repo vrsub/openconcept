@@ -76,4 +76,4 @@ if __name__ == "__main__":
     print('Cd0 Estimate:')
     print(prob['clean_skin_drag.C_d0'])
 
-    data = prob.check_partials(method='fd', compact_print=True, show_only_incorrect=True)
+    data = prob.check_partials(method='cs', compact_print=True, show_only_incorrect=False)

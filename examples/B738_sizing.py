@@ -15,6 +15,7 @@ from openconcept.components.cfm56 import CFM56
 from examples.sizing_functions import HStabSizing_JetTransport, VStabSizing_JetTransport, WingMAC_Trapezoidal, WingRoot_LinearTaper
 from examples.methods.weights_jettransport import JetTransportEmptyWeight
 from examples.methods.drag_buildup import CleanParasiticDrag_JetTransport
+from openconcept.analysis.openaerostruct.drag_polar import OASDragPolar
 
 class B738AirplaneModel(oc.IntegratorGroup):
     """
@@ -55,13 +56,23 @@ class B738AirplaneModel(oc.IntegratorGroup):
 
         # use a different drag coefficient for takeoff versus cruise
         if flight_phase not in ['v0v1', 'v1v0', 'v1vr', 'rotate']:
+            # self.set_input_defaults('ac|aero|polar|CD0_cruise', 0.0125)
             cd0_source = 'ac|aero|polar|CD0_cruise'
         else:
             cd0_source = 'ac|aero|polar|CD0_TO'
+
         self.add_subsystem('drag', PolarDrag(num_nodes=nn),
                            promotes_inputs=['fltcond|CL', 'ac|geom|*', ('CD0', cd0_source),
                                             'fltcond|q', ('e', 'ac|aero|polar|e')],
                            promotes_outputs=['drag'])
+
+        # self.add_subsystem('drag', OASDragPolar(num_nodes=nn, num_x=3, num_y=7,
+        #                                         num_twist=3, promotes_inputs=['fltcond|CL', 'ac|geom|*', ('ac|aero|CD_nonwing', cd0_source),
+        #                                     'fltcond|q', 'fltcond|M', 
+        #                                     'fltcond|h'],
+        #                    promotes_outputs=['drag']))
+        
+        # self.set_input_defaults('ac|geom|wing|twist', np.zeros(5), units='deg')
 
         # generally the weights module will be custom to each airplane
         # passthru = om.ExecComp('OEW=x',
@@ -177,7 +188,7 @@ def configure_problem():
     prob.model = B738AnalysisGroup()
     prob.model.nonlinear_solver = om.NewtonSolver(iprint=2,solve_subsystems=True)
     prob.model.linear_solver = om.DirectSolver()
-    prob.model.nonlinear_solver.options['maxiter'] = 20
+    prob.model.nonlinear_solver.options['maxiter'] = 50
     prob.model.nonlinear_solver.options['atol'] = 1e-6
     prob.model.nonlinear_solver.options['rtol'] = 1e-6
     prob.model.nonlinear_solver.linesearch = om.BoundsEnforceLS(bound_enforcement='scalar', print_bound_enforce=True)
@@ -246,4 +257,4 @@ def run_738_analysis(plots=True):
 
 
 if __name__ == "__main__":
-    run_738_analysis(plots=True)
+    run_738_analysis(plots=False)

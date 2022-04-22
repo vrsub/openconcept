@@ -104,7 +104,7 @@ class TBMAnalysisGroup(Group):
         dv_comp.add_output_from_dict('ac|aero|polar|e')
         dv_comp.add_output_from_dict('ac|aero|polar|CD0_TO')
         dv_comp.add_output_from_dict('ac|aero|polar|CD0_cruise')
-        dv_comp.add_output_from_dict('ac|aero|Vstall_land')
+        
 
         dv_comp.add_output_from_dict('ac|geom|wing|S_ref')
         dv_comp.add_output_from_dict('ac|geom|wing|AR')
