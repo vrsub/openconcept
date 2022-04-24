@@ -14,7 +14,7 @@ from openconcept.analysis.performance.mission_profiles import FullMissionWithRes
 from openconcept.components.cfm56 import CFM56
 from examples.sizing_functions import HStabSizing_JetTransport, VStabSizing_JetTransport, WingMAC_Trapezoidal, WingRoot_LinearTaper
 from examples.methods.weights_jettransport import JetTransportEmptyWeight
-from examples.methods.drag_buildup import CleanParasiticDrag_JetTransport
+from examples.methods.drag_buildup import CleanParasiticDrag_JetTransport, Cd0_NonWing_JetTransport
 from openconcept.analysis.openaerostruct.drag_polar import OASDragPolar
 
 class B738AirplaneModel(oc.IntegratorGroup):
@@ -56,33 +56,23 @@ class B738AirplaneModel(oc.IntegratorGroup):
 
         # use a different drag coefficient for takeoff versus cruise
         if flight_phase not in ['v0v1', 'v1v0', 'v1vr', 'rotate']:
-            # self.set_input_defaults('ac|aero|polar|CD0_cruise', 0.0125)
+            # self.set_input_defaults('ac|aero|polar|CD0_cruise', 0.0145)
             cd0_source = 'ac|aero|polar|CD0_cruise'
         else:
             cd0_source = 'ac|aero|polar|CD0_TO'
 
-        self.add_subsystem('drag', PolarDrag(num_nodes=nn),
-                           promotes_inputs=['fltcond|CL', 'ac|geom|*', ('CD0', cd0_source),
-                                            'fltcond|q', ('e', 'ac|aero|polar|e')],
+        # self.add_subsystem('drag', PolarDrag(num_nodes=nn),
+        #                    promotes_inputs=['fltcond|CL', 'ac|geom|*', ('CD0', cd0_source),
+        #                                     'fltcond|q', ('e', 'ac|aero|polar|e')],
+        #                    promotes_outputs=['drag'])
+
+        oas_surf_dict = {}  # options for OpenAeroStruct
+        oas_surf_dict['t_over_c'] = acdata['ac']['geom']['wing']['toverc']['value']
+        self.add_subsystem('drag', OASDragPolar(num_nodes=nn, num_x=3, num_y=7,
+                                                num_twist=5, surf_options=oas_surf_dict),
+                           promotes_inputs=['fltcond|CL', 'fltcond|M', 'fltcond|h', 'fltcond|q', 'ac|geom|*', ('ac|aero|CD_nonwing', cd0_source)],
                            promotes_outputs=['drag'])
-
-        # self.add_subsystem('drag', OASDragPolar(num_nodes=nn, num_x=3, num_y=7,
-        #                                         num_twist=3, promotes_inputs=['fltcond|CL', 'ac|geom|*', ('ac|aero|CD_nonwing', cd0_source),
-        #                                     'fltcond|q', 'fltcond|M', 
-        #                                     'fltcond|h'],
-        #                    promotes_outputs=['drag']))
-        
-        # self.set_input_defaults('ac|geom|wing|twist', np.zeros(5), units='deg')
-
-        # generally the weights module will be custom to each airplane
-        # passthru = om.ExecComp('OEW=x',
-        #           x={'val': 1.0,
-        #              'units': 'kg'},
-        #           OEW={'val': 1.0,
-        #                'units': 'kg'})
-        # self.add_subsystem('OEW', passthru,
-        #                    promotes_inputs=[('x', 'ac|weights|OEW')],
-        #                    promotes_outputs=['OEW'])
+        self.set_input_defaults('ac|geom|wing|twist', np.zeros(5), units='deg')
 
         self.add_subsystem('weight', oc.AddSubtractComp(output_name='weight',
                                                      input_names=['ac|weights|MTOW', 'fuel_used'],
@@ -136,15 +126,16 @@ class B738AnalysisGroup(om.Group):
         dv_comp.add_output_from_dict('ac|weights|MLW')
         # dv_comp.add_output_from_dict('ac|weights|OEW')
 
+        dv_comp.add_output_from_dict('ac|weights|max_payload')
+
         dv_comp.add_output_from_dict('ac|propulsion|engine|rating')
         dv_comp.add_output_from_dict('ac|propulsion|engine|BPR')
 
         dv_comp.add_output_from_dict('ac|num_passengers_max')
         dv_comp.add_output_from_dict('ac|q_cruise')
 
-        self.add_subsystem('cd0_estimation', CleanParasiticDrag_JetTransport(),
-                            promotes_inputs=['*'],
-                            promotes_outputs=[('C_d0','ac|aero|polar|CD0_cruise')])
+        # self.set_input_defaults('cd0_estimation.ac|weights|MTOW', 79002, units='kg')
+        # self.set_input_defaults('cd0_estimation.ac|geom|wing|S_ref', 124.6, units='m**2')
 
         self.add_subsystem('Wing_Root', WingRoot_LinearTaper(),
                             promotes_inputs=['*'],
@@ -161,15 +152,19 @@ class B738AnalysisGroup(om.Group):
         self.add_subsystem('VStab', VStabSizing_JetTransport(),
                             promotes_inputs=['*'],
                             promotes_outputs=[('vstab_area','ac|geom|vstab|S_ref')])
+        
+        self.add_subsystem('cd0_estimation', Cd0_NonWing_JetTransport(),
+                            promotes_inputs=['*'],
+                            promotes_outputs=[('C_d0','ac|aero|polar|CD0_cruise')])
 
         self.add_subsystem('OEW', JetTransportEmptyWeight(),
                            promotes_inputs=['*'],
                            promotes_outputs=[('OEW','ac|weights|OEW'),('W_engine','ac|propulsion|engine|weight')])
         
         self.add_subsystem('MTOW', oc.AddSubtractComp(output_name='ac|weights|MTOW',
-                                                     input_names=['ac|weights|OEW', 'ac|weights|W_fuel_max'],
-                                                     units='kg', vec_size=[1,1],
-                                                     scaling_factors=[1,1]),
+                                                     input_names=['ac|weights|OEW', 'ac|weights|W_fuel_max', 'ac|weights|max_payload'],
+                                                     units='kg', vec_size=[1,1,1],
+                                                     scaling_factors=[1,1,1], lower=0),
                            promotes_outputs=['ac|weights|MTOW'],
                            promotes_inputs=['*'])
 
@@ -191,7 +186,20 @@ def configure_problem():
     prob.model.nonlinear_solver.options['maxiter'] = 50
     prob.model.nonlinear_solver.options['atol'] = 1e-6
     prob.model.nonlinear_solver.options['rtol'] = 1e-6
-    prob.model.nonlinear_solver.linesearch = om.BoundsEnforceLS(bound_enforcement='scalar', print_bound_enforce=True)
+    prob.model.nonlinear_solver.linesearch = om.ArmijoGoldsteinLS(bound_enforcement='scalar', print_bound_enforce=True)
+
+    prob.driver = om.pyOptSparseDriver(optimizer='IPOPT') 
+    prob.driver.opt_settings['limited_memory_max_history']=1000
+    prob.driver.opt_settings['tol'] = 1e-5
+    prob.driver.opt_settings['constr_viol_tol'] = 1e-6
+
+    prob.model.add_design_var('ac|geom|wing|S_ref', lower = 100, upper=150, units='m**2')
+    prob.model.add_objective('descent.fuel_used_final')
+
+    prob.model.add_constraint('climb.throttle', upper=1.0) # these constraints limit throttle
+    prob.model.add_constraint('cruise.throttle', upper=1.0)
+    prob.model.add_constraint('descent.throttle', upper=1.0)
+
     return prob
 
 def set_values(prob, num_nodes):
@@ -201,7 +209,7 @@ def set_values(prob, num_nodes):
     prob.set_val('climb.fltcond|Ueas', np.linspace(230, 220,num_nodes), units='kn')
     prob.set_val('cruise.fltcond|vs', np.ones((num_nodes,)) * 4., units='ft/min')
     prob.set_val('cruise.fltcond|Ueas', np.linspace(265, 258, num_nodes), units='kn')
-    prob.set_val('descent.fltcond|vs', np.linspace(-1000, -150, num_nodes), units='ft/min')
+    prob.set_val('descent.fltcond|vs', np.linspace(-500, -150, num_nodes), units='ft/min') # set this in optimizer
     prob.set_val('descent.fltcond|Ueas', np.ones((num_nodes,)) * 250, units='kn')
     prob.set_val('reserve_climb.fltcond|vs', np.linspace(3000.,  2300.,num_nodes), units='ft/min')
     prob.set_val('reserve_climb.fltcond|Ueas', np.linspace(230, 230,num_nodes), units='kn')
@@ -248,9 +256,9 @@ def run_738_analysis(plots=True):
     prob = configure_problem()
     prob.setup(check=True, mode='fwd')
     set_values(prob, num_nodes)
-    prob.run_model()
-    prob.model.list_outputs()
-    om.n2(prob,outfile = 'full_mission_sizing.html')    
+    prob.run_driver()
+    # prob.model.list_outputs()
+    om.n2(prob,outfile = 'B738_sizing.html')    
     if plots:
         show_outputs(prob)
     return prob

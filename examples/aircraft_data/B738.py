@@ -57,7 +57,7 @@ maingear['n_wheels'] = {'value': 4}
 geom['maingear'] = maingear
 
 fuselage = dict()
-fuselage['S_wet']       = {'value': 1077, 'units': 'm**2'}
+fuselage['S_wet']       = {'value': 859, 'units': 'm**2'}
 fuselage['width']       = {'value': 3.76, 'units': 'm'}
 fuselage['length']      = {'value': 39.12, 'units': 'm'}
 fuselage['height']      = {'value': 4.01, 'units': 'm'}
@@ -71,6 +71,7 @@ weights['MTOW']         = {'value': 79002, 'units': 'kg'}
 weights['OEW']          = {'value': 0.530*79002, 'units': 'kg'}
 weights['W_fuel_max']   = {'value': 0.266*79002, 'units': 'kg'}
 weights['MLW']          = {'value': 66349, 'units': 'kg'}
+weights['max_payload']          = {'value': 44640, 'units': 'lb'}
 
 ac['weights'] = weights
 

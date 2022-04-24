@@ -189,7 +189,6 @@ def run_tbm_analysis():
     prob.model.nonlinear_solver.options['rtol'] = 1e-6
     prob.model.nonlinear_solver.linesearch = BoundsEnforceLS(bound_enforcement='scalar', print_bound_enforce=False)
     
-    # here is what I added
     #add driver and objective function
     prob.driver = pyOptSparseDriver(optimizer='IPOPT') 
     prob.driver.opt_settings['limited_memory_max_history']=1000
