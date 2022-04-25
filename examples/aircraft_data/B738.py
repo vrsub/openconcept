@@ -9,7 +9,7 @@ ac = dict()
 aero = dict()
 aero['CLmax_TO']   = {'value' : 2.0}
 aero['LoverD']     = {'value': 17}
-aero['Vstall_land'] = {'value': 110, 'units':'kn'}
+aero['Vstall_land'] = {'value': 100, 'units':'kn'}
 
 polar = dict()
 polar['e']              = {'value' : 0.801}
@@ -22,6 +22,7 @@ ac['aero'] = aero
 # ==GEOMETRY==============================
 geom = dict()
 wing = dict()
+# wing['S_ref']           = {'value': 170, 'units': 'm**2'}
 wing['S_ref']           = {'value': 124.6, 'units': 'm**2'}
 wing['AR']              = {'value': 9.45}
 wing['c4sweep']         = {'value': 25.0, 'units': 'deg'}
