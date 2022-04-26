@@ -25,10 +25,12 @@ from examples.sizing_functions import (
     VStabSizing_JetTransport,
     WingMAC_Trapezoidal,
     WingRoot_LinearTaper,
-    StallSpeed_wing,
+    CL_MAX_cruise,
     CL_MAX,
+    StallSpeed_wing,
     WingSpan,
 )
+from examples.methods.costscommuter_jettransport import JetTransportCOC
 from examples.methods.weights_jettransport import JetTransportEmptyWeight
 from examples.methods.drag_buildup import CleanParasiticDrag_JetTransport, Cd0_NonWing_JetTransport
 from openconcept.analysis.openaerostruct.drag_polar import OASDragPolar
@@ -56,21 +58,42 @@ class B738AirplaneModel(oc.IntegratorGroup):
 
         self.add_subsystem("propmodel", CFM56(num_nodes=nn, plot=False), promotes_inputs=propulsion_promotes_inputs)
 
+        # print(flight_phase)
+        # print(nn)
+
         doubler = om.ExecComp(
-            ["thrust=2*thrust_in", "fuel_flow=2*fuel_flow_in"],
+            [
+                "thrust=2*thrust_in*0.5*(1+propulsor_active)*(rating/27000)",
+                "fuel_flow=2*fuel_flow_in*0.5*(1+propulsor_active)*(rating/27000)",
+            ],
             thrust_in={"val": 1.0 * np.ones((nn,)), "units": "kN"},
             thrust={"val": 1.0 * np.ones((nn,)), "units": "kN"},
             fuel_flow={
                 "val": 1.0 * np.ones((nn,)),
                 "units": "kg/s",
-                "tags": ["integrate", "state_name:fuel_used", "state_units:kg", "state_val:1.0", "state_promotes:True"],
+                # "tags": ["integrate", "state_name:fuel_used", "state_units:kg", "state_val:1.0", "state_promotes:True"],
             },
+            propulsor_active={"val": 1.0 * np.ones((nn,))},
+            rating={"val": 27000, "units": "lbf"},
             fuel_flow_in={"val": 1.0 * np.ones((nn,)), "units": "kg/s"},
         )
 
-        self.add_subsystem("doubler", doubler, promotes_outputs=["*"])
+        self.add_subsystem(
+            "doubler",
+            doubler,
+            promotes_inputs=["propulsor_active", ("rating", "ac|propulsion|engine|rating")],
+            promotes_outputs=["*"],
+        )
         self.connect("propmodel.thrust", "doubler.thrust_in")
         self.connect("propmodel.fuel_flow", "doubler.fuel_flow_in")
+
+        intfuel = self.add_subsystem(
+            "intfuel",
+            oc.Integrator(num_nodes=nn, method="simpson", diff_units="s", time_setup="duration"),
+            promotes_inputs=["*"],
+            promotes_outputs=["*"],
+        )
+        intfuel.add_integrand("fuel_used", rate_name="fuel_flow", val=1.0, units="kg")
 
         # use a different drag coefficient for takeoff versus cruise
         if flight_phase not in ["v0v1", "v1v0", "v1vr", "rotate"]:
@@ -88,7 +111,7 @@ class B738AirplaneModel(oc.IntegratorGroup):
         oas_surf_dict["t_over_c"] = acdata["ac"]["geom"]["wing"]["toverc"]["value"]
         self.add_subsystem(
             "drag",
-            OASDragPolar(num_nodes=nn, num_x=3, num_y=7, num_twist=5, surf_options=oas_surf_dict),
+            OASDragPolar(num_nodes=nn, num_x=4, num_y=10, num_twist=5, surf_options=oas_surf_dict),
             promotes_inputs=[
                 "fltcond|CL",
                 "fltcond|M",
@@ -114,8 +137,17 @@ class B738AirplaneModel(oc.IntegratorGroup):
             promotes_outputs=["weight"],
         )
 
-        self.add_subsystem("stall_speed", StallSpeed_wing(num_nodes=nn), promotes_inputs=["*"], promotes_outputs=["*"])
-
+        self.add_subsystem(
+            "Cl_diff",
+            oc.AddSubtractComp(
+                output_name="CL_diff",
+                input_names=["ac|aero|CL_max", "fltcond|CL"],
+                vec_size=[1, nn],
+                scaling_factors=[1, -1],
+            ),
+            promotes_inputs=["*"],
+            promotes_outputs=["*"],
+        )
         # vstall_calc = om.ExecComp(['V_stall_mission=((2*weight)/(fltcond|rho*fltcond|CL))**0.5'],
         #           weight={'val': 1.0*np.ones((nn,)),
         #              'units': 'kN'},
@@ -141,6 +173,7 @@ class B738AnalysisGroup(om.Group):
         # dv_comp.add_output_from_dict('ac|aero|polar|CD0_cruise')
         dv_comp.add_output_from_dict("ac|aero|Vstall_land")
         dv_comp.add_output_from_dict("ac|aero|LoverD")
+        dv_comp.add_output_from_dict("ac|aero|Cl_max")
 
         dv_comp.add_output_from_dict("ac|geom|wing|S_ref")
         dv_comp.add_output_from_dict("ac|geom|wing|AR")
@@ -223,7 +256,11 @@ class B738AnalysisGroup(om.Group):
             "OEW",
             JetTransportEmptyWeight(),
             promotes_inputs=["*"],
-            promotes_outputs=[("OEW", "ac|weights|OEW"), ("W_engine", "ac|propulsion|engine|weight")],
+            promotes_outputs=[
+                ("OEW", "ac|weights|OEW"),
+                ("W_engine", "ac|propulsion|engine|weight"),
+                "W_structure_adjusted",
+            ],
         )
 
         self.add_subsystem(
@@ -240,30 +277,38 @@ class B738AnalysisGroup(om.Group):
             promotes_inputs=["*"],
         )
 
-        
-        self.add_subsystem("CL_MAX", CL_MAX(), promotes_inputs=["*"], promotes_outputs=["*"])
+        # Run a full mission analysis including takeoff, reserve_, cruise,reserve_ and descereserve_n
 
-        # Run a full mission analysis including takeoff, reserve_, cruise,reserve_ and descereserve_nt
+        self.connect("climb.duration", "mission_duration.climb")
+        self.connect("cruise.duration", "mission_duration.cruise")
+        self.connect("descent.duration", "mission_duration.descent")
+
+        self.add_subsystem(
+            "CL_max", CL_MAX_cruise(), promotes_inputs=["*"], promotes_outputs=[("Wing_CL_max", "ac|aero|CL_max")]
+        )
+        # self.add_subsystem('WingStallSpeed', StallSpeed_wing(), promotes_inputs=['*'], promotes_outputs=['*'])
+
         analysis = self.add_subsystem(
             "analysis",
-            MissionWithReserve(num_nodes=nn, aircraft_model=B738AirplaneModel),
+            FullMissionWithReserve(num_nodes=nn, aircraft_model=B738AirplaneModel),
             promotes_inputs=["*"],
             promotes_outputs=["*"],
         )
 
-        # self.add_subsystem(
-        #     "mission_duration",
-        #     oc.AddSubtractComp(
-        #         output_name="total_block_time",
-        #         input_names=["analysis.climb.climbdt.duration", "cruise.duration", "descent.duration", 'reserve_climb.duration', 'reserve_cruise.duration', 'reserve_descent.duration', 'loiter.duration'],
-        #         units="s",
-        #         vec_size=[1, 1, 1,1,1,1,1],
-        #         scaling_factors=[1, 1, 1,1,1,1,1],
-        #         lower=0,
-        #     ),
-        #     promotes_outputs=["total_block_time"],
-        #     promotes_inputs=["*"],
-        # )
+        self.add_subsystem(
+            "mission_duration",
+            oc.AddSubtractComp(
+                output_name="total_block_time",
+                input_names=["climb", "cruise", "descent"],
+                units="s",
+                vec_size=[1, 1, 1],
+                scaling_factors=[1, 1, 1],
+                lower=0,
+            ),
+            promotes_outputs=[("total_block_time", "block_time")],
+        )
+
+        self.add_subsystem("COC", JetTransportCOC(), promotes_inputs=["*"], promotes_outputs=["*"])
 
         self.connect("loiter.fuel_used_final", "ac|weights|W_fuel_max")
         self.set_input_defaults(
@@ -284,7 +329,7 @@ def configure_problem():
     prob.model.nonlinear_solver.options["maxiter"] = 50
     prob.model.nonlinear_solver.options["atol"] = 1e-6
     prob.model.nonlinear_solver.options["rtol"] = 1e-6
-    prob.model.nonlinear_solver.linesearch = om.ArmijoGoldsteinLS(bound_enforcement="scalar", print_bound_enforce=False)
+    prob.model.nonlinear_solver.linesearch = om.ArmijoGoldsteinLS(bound_enforcement="scalar", print_bound_enforce=True)
 
     prob.driver = om.pyOptSparseDriver(optimizer="IPOPT")
     prob.driver.opt_settings["limited_memory_max_history"] = 1000
@@ -292,24 +337,34 @@ def configure_problem():
     prob.driver.opt_settings["constr_viol_tol"] = 1e-9
 
     prob.model.add_design_var("ac|geom|wing|S_ref", lower=100, upper=200, units="m**2")
+    prob.model.add_design_var("ac|propulsion|engine|rating", lower=20000, upper=35000, units="lbf")
     prob.model.add_design_var("ac|geom|wing|AR", lower=5, upper=15)
     prob.model.add_design_var(
         "ac|geom|wing|twist", lower=np.array([0, -5, -5, -5, -5]), upper=np.array([0, 5, 5, 5, 5]), units="deg", ref=1
     )
     prob.model.add_design_var("ac|geom|wing|c4sweep", lower=-2, upper=50, units="deg", ref=1)
     prob.model.add_design_var("ac|geom|wing|taper", lower=0, upper=1, ref=1)
-    prob.model.add_objective("loiter.fuel_used_final")
+    # prob.model.add_objective("COC.COC")
+    prob.model.add_objective("descent.fuel_used_final")
 
     prob.model.add_constraint("ac|geom|wing|span", upper=36, units="m")
 
     prob.model.add_constraint("climb.throttle", upper=1.0)  # these constraints limit throttle
     prob.model.add_constraint("cruise.throttle", upper=1.0)
     prob.model.add_constraint("descent.throttle", upper=1.0)
+    prob.model.add_constraint("reserve_climb.throttle", upper=1.0)  # these constraints limit throttle
+    prob.model.add_constraint("reserve_cruise.throttle", upper=1.0)
+    prob.model.add_constraint("reserve_descent.throttle", upper=1.0)
+    prob.model.add_constraint("loiter.throttle", upper=1.0)
 
-    prob.model.add_constraint("climb.fltcond|CL", upper=0.8)
-    # prob.model.add_constraint('climb.fltcond|CL', upper=1.5) # climb is the only active constraint, need a stall condition on wing, some fxn(climb.fltcond|vs, climb.fltcond|Ueas), can we define max climb rate, stall depends on airfoil selection
-    prob.model.add_constraint("cruise.fltcond|CL", upper=0.8)
-    prob.model.add_constraint("descent.fltcond|CL", upper=0.8)
+    prob.model.add_constraint("climb.CL_diff", lower=0)
+    prob.model.add_constraint("cruise.CL_diff", lower=0)
+    prob.model.add_constraint("descent.CL_diff", lower=0)
+    prob.model.add_constraint("reserve_climb.CL_diff", lower=0)
+    prob.model.add_constraint("reserve_cruise.CL_diff", lower=0)
+    prob.model.add_constraint("reserve_descent.CL_diff", lower=0)
+    prob.model.add_constraint("loiter.CL_diff", lower=0)
+
     prob.driver.options["debug_print"] = ["desvars", "objs", "nl_cons"]
 
     return prob
@@ -336,16 +391,16 @@ def set_values(prob, num_nodes):
     prob.set_val("reserve|h0", 15000.0, units="ft")
     prob.set_val("mission_range", 2050, units="NM")
 
-    # prob.set_val('v0v1.fltcond|Utrue',np.ones((num_nodes))*50,units='kn')
-    # prob.set_val('v1vr.fltcond|Utrue',np.ones((num_nodes))*85,units='kn')
-    # prob.set_val('v1v0.fltcond|Utrue',np.ones((num_nodes))*85,units='kn')
+    prob.set_val("v0v1.fltcond|Utrue", np.ones((num_nodes)) * 50, units="kn")
+    prob.set_val("v1vr.fltcond|Utrue", np.ones((num_nodes)) * 100, units="kn")
+    prob.set_val("v1v0.fltcond|Utrue", np.ones((num_nodes)) * 100, units="kn")
 
 
 def show_outputs(prob):
     # print some outputs
-    vars_list = ["descent.fuel_used_final"]
-    units = ["lb", "lb"]
-    nice_print_names = ["Block fuel"]
+    vars_list = ["descent.fuel_used_final", "COC"]
+    units = ["lb", "USD"]
+    nice_print_names = ["Block fuel", "Mission Cash Operating Cost"]
     print("=======================================================================")
     for i, thing in enumerate(vars_list):
         print(nice_print_names[i] + ": " + str(prob.get_val(thing, units=units[i])[0]) + " " + units[i])
@@ -387,8 +442,8 @@ def run_738_analysis(plots=True):
     prob = configure_problem()
     prob.setup(check=True, mode="fwd")
     set_values(prob, num_nodes)
-    prob.run_model()
-    # prob.run_driver()
+    # prob.run_model()
+    prob.run_driver()
     prob.model.list_outputs()
     om.n2(prob, outfile="B738_sizing.html")
     if plots:

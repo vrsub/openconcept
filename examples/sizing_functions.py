@@ -280,28 +280,73 @@ class WingMAC_Trapezoidal(ExplicitComponent):
         ) ** 2
 
 
+class CL_MAX_cruise(ExplicitComponent):
+    def setup(self):
+        self.add_input("ac|aero|Cl_max")
+        self.add_input("ac|geom|wing|c4sweep", units="rad")
+
+        self.add_output("Wing_CL_max")
+        self.declare_partials(["Wing_CL_max"], ["*"])
+
+    def compute(self, inputs, outputs):
+        cLmax = 0.9 * inputs["ac|aero|Cl_max"] * np.cos(inputs["ac|geom|wing|c4sweep"])
+        outputs["Wing_CL_max"] = cLmax
+
+    def compute_partials(self, inputs, J):
+        J["Wing_CL_max", "ac|aero|Cl_max"] = 0.9 * np.cos(inputs["ac|geom|wing|c4sweep"])
+        J["Wing_CL_max", "ac|geom|wing|c4sweep"] = (
+            -0.9 * inputs["ac|aero|Cl_max"] * np.sin(inputs["ac|geom|wing|c4sweep"])
+        )
+
+
 class StallSpeed_wing(ExplicitComponent):
     def initialize(self):
         self.options.declare("num_nodes", default=1)
 
     def setup(self):
         nn = self.options["num_nodes"]
-        self.add_input("fltcond|CL", shape=[1, nn])
-        self.add_input("fltcond|rho", units="kg/m**3", shape=[1, nn])
-        self.add_input("weight", units="kg", shape=[1, nn])
+        self.add_input("ac|weights|MLW", units="kg")
         self.add_input("ac|geom|wing|S_ref", units="m**2")
+        self.add_input("Wing_CL_max")
 
-        self.add_output("Vstall_wing", units="m/s", shape=[1, nn])
+        self.add_output("Vstall_wing", units="m/s")
+        self.declare_partials(["Vstall_wing"], ["*"])
 
     def compute(self, inputs, outputs):
         Vstall = (
-            2
-            * inputs["weight"]
-            * inputs["ac|geom|wing|S_ref"] ** -1
-            * inputs["fltcond|rho"] ** -1
-            * inputs["fltcond|CL"] ** -1
-        ) ** 0.5
+            2 ** 0.5
+            * inputs["ac|weights|MLW"] ** 0.5
+            * inputs["ac|geom|wing|S_ref"] ** -0.5
+            * 1.225 ** -0.5
+            * inputs["Wing_CL_max"] ** -0.5
+        )
         outputs["Vstall_wing"] = Vstall
+
+    def compute(self, inputs, J):
+        J["Vstall_wing", "ac|weights|MLW"] = (
+            2 ** 0.5
+            * 0.5
+            * inputs["ac|weights|MLW"] ** (0.5 - 1)
+            * inputs["ac|geom|wing|S_ref"] ** -0.5
+            * 1.225 ** -0.5
+            * inputs["Wing_CL_max"] ** -0.5
+        )
+        J["Vstall_wing", "ac|geom|wing|S_ref"] = (
+            2 ** 0.5
+            * inputs["ac|weights|MLW"] ** 0.5
+            * -0.5
+            * inputs["ac|geom|wing|S_ref"] ** (-0.5 - 1)
+            * 1.225 ** -0.5
+            * inputs["Wing_CL_max"] ** -0.5
+        )
+        J["Vstall_wing", "Wing_CL_max"] = (
+            2 ** 0.5
+            * inputs["ac|weights|MLW"] ** 0.5
+            * inputs["ac|geom|wing|S_ref"] ** -0.5
+            * 1.225 ** -0.5
+            * -0.5
+            * inputs["Wing_CL_max"] ** (-0.5 - 1)
+        )
 
 
 class CL_MAX(ExplicitComponent):
@@ -309,18 +354,38 @@ class CL_MAX(ExplicitComponent):
         self.add_input("ac|weights|MTOW", units="kg")
         self.add_input("ac|geom|wing|S_ref", units="m**2")
         self.add_input("ac|aero|Vstall_land", units="m/s")
+        self.add_input("ac|geom|wing|c4sweep", units="rad")
 
         self.add_output("CL_max")
+        self.declare_partials(["CL_max"], ["*"])
 
     def compute(self, inputs, outputs):
-        clmax = (
-            inputs["ac|weights|MTOW"]
-            * 2
-            * inputs["ac|geom|wing|S_ref"] ** -1
-            * inputs["ac|aero|Vstall_land"] ** -2
-            * 1.225 ** -1
-        )
+        clmax = 2 * inputs["ac|weights|MTOW"] * inputs["ac|geom|wing|S_ref"] ** -1 * 1.225 ** -1 * inputs[
+            "ac|aero|Vstall_land"
+        ] ** -2 - 0.9 * 1.2 * np.cos(inputs["ac|geom|wing|c4sweep"])
         outputs["CL_max"] = clmax
+
+    def compute_partials(self, inputs, J):
+        J["CL_max", "ac|weights|MTOW"] = (
+            2 * inputs["ac|geom|wing|S_ref"] ** -1 * 1.225 ** -1 * inputs["ac|aero|Vstall_land"] ** -2
+        )
+        J["CL_max", "ac|geom|wing|S_ref"] = (
+            2
+            * inputs["ac|weights|MTOW"]
+            * -1
+            * inputs["ac|geom|wing|S_ref"] ** -2
+            * 1.225 ** -1
+            * inputs["ac|aero|Vstall_land"] ** -2
+        )
+        J["CL_max", "ac|aero|Vstall_land"] = (
+            2
+            * inputs["ac|weights|MTOW"]
+            * inputs["ac|geom|wing|S_ref"] ** -1
+            * 1.225 ** -1
+            * -2
+            * inputs["ac|aero|Vstall_land"] ** -3
+        )
+        J["CL_max", "ac|geom|wing|c4sweep"] = -0.9 * 1.2 * np.sin(inputs["ac|geom|wing|c4sweep"])
 
 
 class WingSpan(ExplicitComponent):

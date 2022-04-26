@@ -4,6 +4,7 @@ import os
 import numpy as np
 
 sys.path.insert(0, os.getcwd())
+import openmdao.api as om
 from openmdao.api import Problem, Group, ScipyOptimizeDriver
 from openmdao.api import DirectSolver, SqliteRecorder, IndepVarComp
 from openmdao.api import NewtonSolver, BoundsEnforceLS
@@ -205,9 +206,11 @@ def run_kingair_analysis(plots=False):
     prob.setup(check=True, mode='fwd')
     set_values(prob, num_nodes)
     prob.run_model()
+    om.n2(prob)
     if plots:
         show_outputs(prob)
     return prob
+    
 
 
 if __name__ == "__main__":

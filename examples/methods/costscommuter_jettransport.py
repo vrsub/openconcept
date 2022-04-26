@@ -378,6 +378,12 @@ class JetTransportCOC(Group):
         self.add_subsystem("landing_cost", LandingCost(), promotes_inputs=["*"], promotes_outputs=["*"])
         self.add_subsystem("nav_cost", NavigationCost(), promotes_inputs=["*"], promotes_outputs=["*"])
         self.add_subsystem(
+            "airfram_cost",
+            AddSubtractComp(output_name="C_airframe", input_names=["C_aircraft", "C_engine"], scaling_factors=[1, -1]),
+            promotes_outputs=["*"],
+            promotes_inputs=["*"],
+        )
+        self.add_subsystem(
             "airframe_labor", AirframeMaintananceLaborCost(), promotes_inputs=["*"], promotes_outputs=["*"]
         )
         self.add_subsystem(
