@@ -1,0 +1,1041 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2636
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Design Vars\
+\{'ac|geom|wing|twist': array([0.        , 3.18042631, 3.9675056 , 3.01614371, 5.        ]),\
+ 'dv_comp.ac|geom|wing|AR': array([11.22884153]),\
+ 'dv_comp.ac|geom|wing|S_ref': array([115.41707099]),\
+ 'dv_comp.ac|geom|wing|c4sweep': array([24.32713549]),\
+ 'dv_comp.ac|geom|wing|taper': array([0.46032185]),\
+ 'dv_comp.ac|propulsion|engine|rating': array([28169.37458345])\}\
+\
+NL: Newton 0 ; 1.05943303e-10 1\
+NL: Newton Converged\
+Nonlinear constraints\
+\{'analysis.climb.acmodel.Cl_diff.CL_diff': array([ 6.26856544e-02,  5.66262068e-02,  5.06039767e-02,  4.45524497e-02,\
+        3.84535213e-02,  3.22900834e-02,  2.60465275e-02,  1.97121813e-02,\
+        1.32725296e-02,  6.70798421e-03, -1.00000686e-09]),\
+ 'analysis.climb.steadyflt.throttle': array([0.62705051, 0.75808812, 0.78125877, 0.80504037, 0.86349639,\
+       0.90080621, 0.94444996, 0.98493041, 1.        , 0.99912479,\
+       0.99183248]),\
+ 'analysis.cruise.acmodel.Cl_diff.CL_diff': array([0.28028413, 0.28503594, 0.28973818, 0.29439336, 0.29900367,\
+       0.30357127, 0.30809805, 0.31258587, 0.3170364 , 0.32145126,\
+       0.32583195]),\
+ 'analysis.cruise.steadyflt.throttle': array([0.90607025, 0.89883925, 0.89178598, 0.88490106, 0.87817575,\
+       0.87160175, 0.86517122, 0.85887656, 0.8527105 , 0.84666597,\
+       0.84073608]),\
+ 'analysis.descent.acmodel.Cl_diff.CL_diff': array([0.28839987, 0.2918151 , 0.29513276, 0.29841684, 0.30170309,\
+       0.30502212, 0.30838806, 0.31181415, 0.31531365, 0.31887816,\
+       0.3224829 ]),\
+ 'analysis.descent.steadyflt.throttle': array([0.66978951, 0.54257772, 0.45156754, 0.38341677, 0.3342426 ,\
+       0.29887731, 0.27960444, 0.26468484, 0.24330565, 0.2191972 ,\
+       0.19755032]),\
+ 'analysis.loiter.acmodel.Cl_diff.CL_diff': array([0.02038352, 0.02179151, 0.02319829, 0.02460388, 0.02600827,\
+       0.02741148, 0.0288135 , 0.03021434, 0.03161399, 0.03301248,\
+       0.03440979]),\
+ 'analysis.loiter.steadyflt.throttle': array([0.19287313, 0.19262326, 0.19237394, 0.19212516, 0.19187692,\
+       0.19162922, 0.19138205, 0.19113543, 0.19088934, 0.19064379,\
+       0.19039877]),\
+ 'analysis.reserve_climb.acmodel.Cl_diff.CL_diff': array([0.2229897 , 0.22304655, 0.22314057, 0.22326403, 0.22341164,\
+       0.22358002, 0.22376748, 0.22397236, 0.22419259, 0.22442619,\
+       0.22467142]),\
+ 'analysis.reserve_climb.steadyflt.throttle': array([0.61974043, 0.6557602 , 0.70162305, 0.74243558, 0.76557203,\
+       0.7698692 , 0.76500688, 0.76190725, 0.76635382, 0.77871799,\
+       0.79601018]),\
+ 'analysis.reserve_cruise.acmodel.Cl_diff.CL_diff': array([0.32695682, 0.32756454, 0.32817201, 0.32877925, 0.32938625,\
+       0.32999302, 0.33059954, 0.33120583, 0.33181188, 0.3324177 ,\
+       0.33302327]),\
+ 'analysis.reserve_cruise.steadyflt.throttle': array([0.38410442, 0.3840169 , 0.3839296 , 0.38384251, 0.38375563,\
+       0.38366897, 0.38358252, 0.38349629, 0.38341026, 0.38332445,\
+       0.38323885]),\
+ 'analysis.reserve_descent.acmodel.Cl_diff.CL_diff': array([0.33320167, 0.33368658, 0.33417054, 0.33465395, 0.33513718,\
+       0.33562074, 0.33610544, 0.33659222, 0.33708228, 0.33757726,\
+       0.33808187]),\
+ 'analysis.reserve_descent.steadyflt.throttle': array([0.23918477, 0.224396  , 0.21111329, 0.19910348, 0.188049  ,\
+       0.1774953 , 0.16677389, 0.15501858, 0.14126796, 0.12437113,\
+       0.10243932]),\
+ 'analysis.rotate.tod_final.range_final': array([2152.08292091]),\
+ 'analysis.v1v0.ode_integ_phase.range_final': array([2152.08292091]),\
+ 'wingspan.span': array([36.])\}\
+\
+Objectives\
+\{'analysis.descent.acmodel.intfuel.fuel_used_final': array([16121.14739554])\}\
+\
+506 Explicit Output(s) in 'model'\
+\
+varname                        val                     \
+-----------------------------  ------------------------\
+dv_comp\
+  ac|aero|CLmax_TO             [2.]                    \
+  ac|aero|polar|e              [0.801]                 \
+  ac|aero|polar|CD0_TO         [0.03]                  \
+  ac|aero|Vstall_land          [100.]                  \
+  ac|aero|LoverD               [17.]                   \
+  ac|aero|Cl_max               [1.1]                   \
+  ac|geom|wing|S_ref           [115.41707099]          \
+  ac|geom|wing|AR              [11.22884153]           \
+  ac|geom|wing|c4sweep         [24.32713549]           \
+  ac|geom|wing|taper           [0.46032185]            \
+  ac|geom|wing|toverc          [0.12]                  \
+  ac|geom|hstab|c4_to_wing_c4  [17.9]                  \
+  ac|geom|hstab|AR             [6.16]                  \
+  ac|geom|hstab|c4sweep        [30.]                   \
+  ac|geom|hstab|taper          [0.203]                 \
+  ac|geom|vstab|AR             [1.94]                  \
+  ac|geom|vstab|toverc         [0.12]                  \
+  ac|geom|vstab|c4sweep        [35.]                   \
+  ac|geom|fuselage|S_wet       [859.]                  \
+  ac|geom|fuselage|length      [39.12]                 \
+  ac|geom|fuselage|width       [3.76]                  \
+  ac|geom|fuselage|height      [4.01]                  \
+  ac|geom|nosegear|length      [3.]                    \
+  ac|geom|nosegear|n_wheels    [2.]                    \
+  ac|geom|maingear|length      [4.]                    \
+  ac|geom|maingear|n_wheels    [4.]                    \
+  ac|weights|MLW               [66349.]                \
+  ac|weights|max_payload       [44640.]                \
+  ac|propulsion|engine|rating  [28169.37458345]        \
+  ac|propulsion|engine|BPR     [11.]                   \
+  ac|num_passengers_max        [180.]                  \
+  ac|q_cruise                  [212.662]               \
+Wing_Root\
+  C_root                       [14.40568777]           \
+Wing_MAC\
+  MAC                          [10.99732509]           \
+HStab\
+  hstab_area                   [232.64253347]          \
+VStab\
+  vstab_area                   [224.87030175]          \
+wingspan\
+  span                         [36.]                   \
+cd0_estimation\
+  nonwing_wetted_area\
+    S_wet                      [9236.6048136]          \
+  nonwing_cd0\
+    C_d0                       [0.02230455]            \
+OEW\
+  const\
+    structural_fudge           [1.6]                   \
+    n_engines                  [2.]                    \
+  wing\
+    W_wing                     [17458.50261341]        \
+  hstabconst\
+    HstabConst                 [1.20604386]            \
+  hstab\
+    W_hstab                    [1993.00206673]         \
+  vstab\
+    W_vstab                    [1111.72683871]         \
+  fuselage_constant1\
+    FuseConst1                 [1.22282917]            \
+  fuselage_constant2\
+    K_ws                       [0.38155162]            \
+  fuselage\
+    W_fuselage                 [27131.83316832]        \
+  mlg\
+    W_mlg                      [6934.84085642]         \
+  nlg\
+    W_nlg                      [769.31849201]          \
+  engine_dry\
+    W_engine                   [5267.89618513]         \
+  engine_systems\
+    W_engineSystems            [1082.0717275]          \
+  single_engine_wet\
+    W_singleEngineWet          [6349.96791263]         \
+  total_engines\
+    W_engines_total            [12699.93582525]        \
+  structural\
+    W_structure                [55399.22403561]        \
+  structural_fudge\
+    W_structure_adjusted       [88638.75845699]        \
+  totalempty\
+    OEW                        [101338.69428224]       \
+MTOW\
+  ac|weights|MTOW              [85233.93456436]        \
+CL_max\
+  Wing_CL_max                  [0.9020962]             \
+analysis\
+  missionparams\
+    takeoff|h                  [0.]                    \
+    cruise|h0                  [33000.]                \
+    mission_range              [2050.]                 \
+    reserve_range              [200.]                  \
+    reserve|h0                 [15000.]                \
+    loiter|h0                  [1500.]                 \
+    loiter_duration            [1800.]                 \
+    payload                    [1000.]                 \
+  v0v1\
+    const_settings\
+      fltcond|CL               |0.3316624790355402|    \
+      vr_vstall_mult           [1.1]                   \
+      fltcond|h                |0.0|                   \
+      fltcond|vs               |0.0|                   \
+      zero_speed               [2.]                    \
+      braking                  |0.09949874371066222|   \
+      propulsor_active         |3.3166247903554|       \
+      throttle                 |3.3166247903554003|    \
+    atmos\
+      temp\
+        fltcond|T              |955.718599588812|      \
+      pressure\
+        fltcond|p              |336057.0068827609|     \
+      density\
+        fltcond|rho            |4.06265183015317|      \
+      speedofsound\
+        fltcond|a              |1128.6571456877416|    \
+      equivair\
+        fltcond|Ueas           |162.17109674693475|    \
+      dynamicpressure\
+        fltcond|q              |6429.106850014879|     \
+      machnumber\
+        fltcond|M              |0.47656174147517916|   \
+    gs\
+      fltcond|groundspeed      |162.17535864818706|    \
+      fltcond|cosgamma         |3.3166247903554|       \
+      fltcond|singamma         |0.0|                   \
+    acmodel\
+      propmodel\
+        thrust                 |86326.63838650248|     \
+        fuel_flow              |9.919338769418609|     \
+        T4                     |10689.270891046255|    \
+      doubler\
+        fuel_flow              |9.388406807440898|     \
+        thrust                 |801.2622505467597|     \
+      intfuel\
+        fuel_used_final        [88.66854898]           \
+        fuel_used              |173.46249249429812|    \
+      drag\
+        training_data\
+          CL_train             |12.908673310159188|    \
+          CD_train             |1.6044400803419534|    \
+        aero_surrogate\
+          CL                   |0.33166247903554025|   \
+          CD                   |0.12371247687396206|   \
+        drag_calc\
+          drag                 |27709.84387207612|     \
+      weight\
+        weight                 |282542.53499544604|    \
+      Cl_diff\
+        CL_diff                |2.6602521310178027|    \
+    lift\
+      lift                     |74202.86817352803|     \
+    stall\
+      Vstall_eas               [76.88888047]           \
+    vrspeed\
+      takeoff|vr               [84.57776851]           \
+    haccel\
+      accel_horiz              |8.221228417978983|     \
+    ode_integ_phase\
+      fltcond|Utrue_final      [79.30136047]           \
+      fltcond|Utrue            |162.17535864818575|    \
+      range_final              [1333.03075441]         \
+      range                    |2166.4668401304425|    \
+  v1vr\
+    const_settings\
+      fltcond|CL               |0.3316624790355402|    \
+      vr_vstall_mult           [1.1]                   \
+      fltcond|h                |0.0|                   \
+      fltcond|vs               |0.0|                   \
+      zero_speed               [2.]                    \
+      braking                  |0.09949874371066185|   \
+      propulsor_active         |7.221909996257185e-18| \
+      throttle                 |3.3166247903553994|    \
+    atmos\
+      temp\
+        fltcond|T              |955.718599588812|      \
+      pressure\
+        fltcond|p              |336057.0068827609|     \
+      density\
+        fltcond|rho            |4.06265183015317|      \
+      speedofsound\
+        fltcond|a              |1128.6571456877416|    \
+      equivair\
+        fltcond|Ueas           |271.8737599855685|     \
+      dynamicpressure\
+        fltcond|q              |13661.665700766978|    \
+      machnumber\
+        fltcond|M              |0.7989378817750171|    \
+    gs\
+      fltcond|groundspeed      |271.8809049031364|     \
+      fltcond|cosgamma         |3.3166247903554|       \
+      fltcond|singamma         |0.0|                   \
+    acmodel\
+      propmodel\
+        thrust                 |78511.38204689254|     \
+        fuel_flow              |10.101659778104539|    \
+        T4                     |10720.00762693331|     \
+      doubler\
+        fuel_flow              |4.780484548002146|     \
+        thrust                 |364.36149865338393|    \
+      intfuel\
+        fuel_used_final        [98.12262664]           \
+        fuel_used              |309.9079262531286|     \
+      drag\
+        training_data\
+          CL_train             |12.908673310159188|    \
+          CD_train             |1.6044400803419534|    \
+        aero_surrogate\
+          CL                   |0.33166247903554025|   \
+          CD                   |0.12388953530308139|   \
+        drag_calc\
+          drag                 |58899.67053267942|     \
+      weight\
+        weight                 |282379.231267676|      \
+      Cl_diff\
+        CL_diff                |2.6602521310178022|    \
+    lift\
+      lift                     |157678.94400798072|    \
+    stall\
+      Vstall_eas               [76.88888047]           \
+    vrspeed\
+      takeoff|vr               [84.57776851]           \
+    haccel\
+      accel_horiz              |2.6683449934699|       \
+    ode_integ_phase\
+      fltcond|Utrue_final      [84.57776851]           \
+      fltcond|Utrue            |271.88090490313647|    \
+      range_final              [1870.61625082]         \
+      range                    |5333.926852531552|     \
+  rotate\
+    const_settings\
+      braking                  |0.0|                   \
+      propulsor_active         |4.370518599560435e-18| \
+      throttle                 |3.3166247903554|       \
+      v2_vstall_mult           [1.2]                   \
+      vr_vstall_mult           [1.1]                   \
+      fltcond|vs               |0.0|                   \
+      fltcond|cosgamma         |3.316624790355423|     \
+      h_obstacle               [35.]                   \
+    altitudes\
+      vec                      |21.84509927649678|     \
+    stall\
+      Vstall_eas               [76.88888047]           \
+    vrspeed\
+      takeoff|vr               [84.57776851]           \
+    v2speed\
+      takeoff|v2               [92.26665656]           \
+    speeds\
+      vec                      |570.2737368990803|     \
+    atmos\
+      temp\
+        fltcond|T              |955.5928321330865|     \
+      pressure\
+        fltcond|p              |335824.6655936663|     \
+      density\
+        fltcond|rho            |4.060377175263081|     \
+      speedofsound\
+        fltcond|a              |1128.582879280544|     \
+      trueair\
+        fltcond|Utrue          |293.4664176581979|     \
+      dynamicpressure\
+        fltcond|q              |15918.727564807752|    \
+      machnumber\
+        fltcond|M              |0.8624265621556214|    \
+    clcomp\
+      fltcond|CL               |5.028779560801605|     \
+    acmodel\
+      propmodel\
+        thrust                 |77491.30212554989|     \
+        fuel_flow              |10.144313409020981|    \
+        T4                     |10727.317347122767|    \
+      doubler\
+        fuel_flow              |4.80066984705114|      \
+        thrust                 |359.627435397885|      \
+      intfuel\
+        fuel_used_final        [102.87874555]          \
+        fuel_used              |333.35456473476444|    \
+      drag\
+        training_data\
+          CL_train             |12.908673310159188|    \
+          CD_train             |1.6044400803419534|    \
+        aero_surrogate\
+          CL                   |5.0287795608016115|    \
+          CD                   |0.32118752235271647|   \
+        drag_calc\
+          drag                 |176588.04502431885|    \
+      weight\
+        weight                 |282355.6631583875|     \
+      Cl_diff\
+        CL_diff                |2.0480113418909203|    \
+    climbangle\
+      gamma                    |0.21941799589078373|   \
+    transition\
+      s_transition             [239.26269923]          \
+      h_transition             [7.85527825]            \
+      t_transition             [2.82869755]            \
+    v2climb\
+      s_climb                  [42.20397086]           \
+      t_climb                  [0.45716681]            \
+    tod_final\
+      range_final              [2152.08292091]         \
+    duration\
+      duration                 [3.28586436]            \
+    h_final\
+      fltcond|h_final          [10.668]                \
+    ranges\
+      vec                      |6677.420501753954|     \
+  v1v0\
+    const_settings\
+      fltcond|CL               |0.33166247903554025|   \
+      vr_vstall_mult           [1.1]                   \
+      fltcond|h                |0.0|                   \
+      fltcond|vs               |0.0|                   \
+      zero_speed               [2.]                    \
+      braking                  |1.32664991614216|      \
+      propulsor_active         |0.0|                   \
+      throttle                 |1.2421031685512448e-19|\
+    atmos\
+      temp\
+        fltcond|T              |955.718599588812|      \
+      pressure\
+        fltcond|p              |336057.0068827609|     \
+      density\
+        fltcond|rho            |4.06265183015317|      \
+      speedofsound\
+        fltcond|a              |1128.6571456877416|    \
+      equivair\
+        fltcond|Ueas           |157.376145084394|      \
+      dynamicpressure\
+        fltcond|q              |6194.610175905321|     \
+      machnumber\
+        fltcond|M              |0.46247112631361587|   \
+    gs\
+      fltcond|groundspeed      |157.38028097299116|    \
+      fltcond|cosgamma         |3.3166247903554|       \
+      fltcond|singamma         |0.0|                   \
+    acmodel\
+      propmodel\
+        thrust                 |4826.544545680309|     \
+        fuel_flow              |1.295642763868059|     \
+        T4                     |6054.891522614178|     \
+      doubler\
+        fuel_flow              |0.6131467846330739|    \
+        thrust                 |22.39938921124875|     \
+      intfuel\
+        fuel_used_final        [92.35629496]           \
+        fuel_used              |300.67550434488624|    \
+      drag\
+        training_data\
+          CL_train             |12.908673310159188|    \
+          CD_train             |1.6044400803419534|    \
+        aero_surrogate\
+          CL                   |0.3316624790355401|    \
+          CD                   |0.12370260200989525|   \
+        drag_calc\
+          drag                 |26698.986682524705|    \
+      weight\
+        weight                 |282388.33008370444|    \
+      Cl_diff\
+        CL_diff                |2.6602521310178027|    \
+    lift\
+      lift                     |71496.37624517528|     \
+    stall\
+      Vstall_eas               [76.88888047]           \
+    vrspeed\
+      takeoff|vr               [84.57776851]           \
+    haccel\
+      accel_horiz              |12.730402897657097|    \
+    flipaccel\
+      vec_out                  |12.730402897657097|    \
+    ode_integ_phase\
+      fltcond|Utrue_initial    [79.30136047]           \
+      vel_q                    |157.3802809729912|     \
+      range_final              [2152.08292091]         \
+      range                    |6230.399698707804|     \
+    flipvel\
+      vec_out                  |157.3802809729912|     \
+  engineoutclimb\
+    const_settings\
+      v2_vstall_mult           [1.2]                   \
+      fltcond|h                [0.]                    \
+      fltcond|cosgamma         [1.]                    \
+      propulsor_active         [-1.58937596e-17]       \
+      throttle                 [1.]                    \
+    stall\
+      Vstall_eas               [76.88888047]           \
+    vrspeed\
+      takeoff|v2               [92.26665656]           \
+    atmos\
+      temp\
+        fltcond|T              [288.16]                \
+      pressure\
+        fltcond|p              [101325.]               \
+      density\
+        fltcond|rho            [1.22493562]            \
+      speedofsound\
+        fltcond|a              [340.30293356]          \
+      trueair\
+        fltcond|Utrue          [92.26908135]           \
+      dynamicpressure\
+        fltcond|q              [5214.29574657]         \
+      machnumber\
+        fltcond|M              [0.27113807]            \
+    clcomp\
+      fltcond|CL               [1.38888889]            \
+    acmodel\
+      propmodel\
+        thrust                 [23213.61339638]        \
+        fuel_flow              [3.06968421]            \
+        T4                     [3236.44525586]         \
+      doubler\
+        fuel_flow              [1.45268978]            \
+        thrust                 [107.73147467]          \
+      intfuel\
+        fuel_used_final        [0.]                    \
+        fuel_used              [0.]                    \
+      drag\
+        training_data\
+          CL_train             |12.908673310159188|    \
+          CD_train             |1.525136042413223|     \
+        aero_surrogate\
+          CL                   [1.38888889]            \
+          CD                   [0.07921287]            \
+        drag_calc\
+          drag                 [47671.78881236]        \
+      weight\
+        weight                 [85233.93456436]        \
+      Cl_diff\
+        CL_diff                [-0.48679269]           \
+    climbangle\
+      gamma                    [0.07191579]            \
+  climb\
+    const_settings\
+      propulsor_active         |3.3166247903554|       \
+    ode_integ_phase\
+      fltcond|h_final          [10058.4]               \
+      fltcond|h                |22344.677348260353|    \
+      range_final              [220885.30434381]       \
+      range                    |412948.0659159248|     \
+    atmos\
+      temp\
+        fltcond|T              |831.0407881375451|     \
+      pressure\
+        fltcond|p              |188215.03227098595|    \
+      density\
+        fltcond|rho            |2.4699053117899523|    \
+      speedofsound\
+        fltcond|a              |1050.6259827347546|    \
+      trueair\
+        fltcond|Utrue          |537.8778983658289|     \
+      dynamicpressure\
+        fltcond|q              |27233.386982447348|    \
+      machnumber\
+        fltcond|M              |1.7246371686995956|    \
+    gs\
+      fltcond|groundspeed      |537.2464587959988|     \
+      fltcond|cosgamma         |3.3113411946658458|    \
+      fltcond|singamma         |0.18713495800883848|   \
+    acmodel\
+      propmodel\
+        thrust                 |32458.646077365258|    \
+        fuel_flow              |4.7768386631951065|    \
+        T4                     |9707.88717798715|      \
+      doubler\
+        fuel_flow              |4.5211586846747425|    \
+        thrust                 |301.27302871690273|    \
+      intfuel\
+        fuel_used_final        [1926.58391141]         \
+        fuel_used              |4088.673809692093|     \
+      drag\
+        training_data\
+          CL_train             |12.908673310159188|    \
+          CD_train             |1.525136042413223|     \
+        aero_surrogate\
+          CL                   |2.8868427177057567|    \
+          CD                   |0.1636435502147714|    \
+        drag_calc\
+          drag                 |154871.15277262952|    \
+      weight\
+        weight                 |279077.3110975751|     \
+      Cl_diff\
+        CL_diff                |0.12446354232404022|   \
+    clcomp\
+      fltcond|CL               |2.8868427177057594|    \
+    lift\
+      lift                     |2732400.3977758777|    \
+    haccel\
+      accel_horiz              |2.335912162498244e-13| \
+  cruise\
+    const_settings\
+      propulsor_active         |3.3166247903554|       \
+    ode_integ_phase\
+      fltcond|h_final          [10280.9648625]         \
+      fltcond|h                |33729.8285929161|      \
+      range_final              [2786406.8830081]       \
+      range                    |5673876.381896312|     \
+    atmos\
+      temp\
+        fltcond|T              |736.4815269248995|     \
+      pressure\
+        fltcond|p              |85434.0345432462|      \
+      density\
+        fltcond|rho            |1.340232228305223|     \
+      speedofsound\
+        fltcond|a              |990.7805779823454|     \
+      trueair\
+        fltcond|Utrue          |776.8569787250191|     \
+      dynamicpressure\
+        fltcond|q              |36771.90475407658|     \
+      machnumber\
+        fltcond|M              |2.60050204550223|      \
+    gs\
+      fltcond|groundspeed      |776.8569758017485|     \
+      fltcond|cosgamma         |3.316624777874289|     \
+      fltcond|singamma         |0.0002877330736664681| \
+    acmodel\
+      propmodel\
+        thrust                 |18600.417699014262|    \
+        fuel_flow              |3.2435588692271393|    \
+        T4                     |9431.066619363908|     \
+      doubler\
+        fuel_flow              |3.069947591876854|     \
+        thrust                 |172.64442152715884|    \
+      intfuel\
+        fuel_used_final        [12053.74642506]        \
+        fuel_used              |25790.730685600953|    \
+      drag\
+        training_data\
+          CL_train             |12.908673310159188|    \
+          CD_train             |1.525136042413223|     \
+        aero_surrogate\
+          CL                   |1.986336222818036|     \
+          CD                   |0.1346645162939542|    \
+        drag_calc\
+          drag                 |172423.80270559073|    \
+      weight\
+        weight                 |259403.05741324727|    \
+      Cl_diff\
+        CL_diff                |1.0072848841302677|    \
+    clcomp\
+      fltcond|CL               |1.9863362228180368|    \
+    lift\
+      lift                     |2543874.9834149126|    \
+    haccel\
+      accel_horiz              |7.612385704967653e-14| \
+  descent\
+    const_settings\
+      propulsor_active         |3.3166247903554|       \
+    ode_integ_phase\
+      fltcond|h_final          [-1.8189894e-12]        \
+      fltcond|h                |17978.981859835225|    \
+      range_final              [3796600.]              \
+      range                    |11107820.32624287|     \
+    atmos\
+      temp\
+        fltcond|T              |865.7074850827206|     \
+      pressure\
+        fltcond|p              |226246.13055101148|    \
+      density\
+        fltcond|rho            |2.8900750123675194|    \
+      speedofsound\
+        fltcond|a              |1072.3891321676901|    \
+      trueair\
+        fltcond|Utrue          |552.3041617893107|     \
+      dynamicpressure\
+        fltcond|q              |33601.55810619323|     \
+      machnumber\
+        fltcond|M              |1.7418209032623784|    \
+    gs\
+      fltcond|groundspeed      |552.2738685710135|     \
+      fltcond|cosgamma         |3.3164594547584523|    \
+      fltcond|singamma         |0.033116233832811974|  \
+    acmodel\
+      propmodel\
+        thrust                 |13769.829319154405|    \
+        fuel_flow              |2.2999277556995694|    \
+        T4                     |7729.028642702367|     \
+      doubler\
+        fuel_flow              |2.17682427227936|      \
+        thrust                 |127.80810924795034|    \
+      intfuel\
+        fuel_used_final        [16121.14739554]        \
+        fuel_used              |46823.68604997863|     \
+      drag\
+        training_data\
+          CL_train             |12.908673310159188|    \
+          CD_train             |1.525136042413223|     \
+        aero_surrogate\
+          CL                   |1.979949433600988|     \
+          CD                   |0.12878002137038191|   \
+        drag_calc\
+          drag                 |150584.96596588427|    \
+      weight\
+        weight                 |236095.89884876498|    \
+      Cl_diff\
+        CL_diff                |1.012907798188611|     \
+    clcomp\
+      fltcond|CL               |1.9799494336009906|    \
+    lift\
+      lift                     |2315193.1091506137|    \
+    haccel\
+      accel_horiz              |1.5243756526218276e-13|\
+  reserve_climb\
+    const_settings\
+      propulsor_active         |3.3166247903554|       \
+    ode_integ_phase\
+      fltcond|h_final          [4572.]                 \
+      fltcond|h                |9227.898315424012|     \
+      range_final              [3841721.49589281]      \
+      range                    |12664156.798904635|    \
+    atmos\
+      temp\
+        fltcond|T              |905.0218033905173|     \
+      pressure\
+        fltcond|p              |259081.29764550723|    \
+      density\
+        fltcond|rho            |3.2747400703233898|    \
+      speedofsound\
+        fltcond|a              |1097.9877852782809|    \
+      trueair\
+        fltcond|Utrue          |444.18938726398653|    \
+      dynamicpressure\
+        fltcond|q              |28440.35878108196|     \
+      machnumber\
+        fltcond|M              |1.3458898024083585|    \
+    gs\
+      fltcond|groundspeed      |441.92400050727696|    \
+      fltcond|cosgamma         |3.2989198763662917|    \
+      fltcond|singamma         |0.34223916975619795|   \
+    acmodel\
+      propmodel\
+        thrust                 |39387.406368235126|    \
+        fuel_flow              |5.533279348188088|     \
+        T4                     |9471.180735896702|     \
+      doubler\
+        fuel_flow              |5.237110931240631|     \
+        thrust                 |365.58404751628007|    \
+      intfuel\
+        fuel_used_final        [16655.8177799]         \
+        fuel_used              |54390.44687407635|     \
+      drag\
+        training_data\
+          CL_train             |12.908673310159188|    \
+          CD_train             |1.525136042413223|     \
+        aero_surrogate\
+          CL                   |2.250057977499434|     \
+          CD                   |0.13689169076879|      \
+        drag_calc\
+          drag                 |135483.33064638873|    \
+      weight\
+        weight                 |228302.11175949225|    \
+      Cl_diff\
+        CL_diff                |0.7418596073725431|    \
+    clcomp\
+      fltcond|CL               |2.2500579774994356|    \
+    lift\
+      lift                     |2226909.078462508|     \
+    haccel\
+      accel_horiz              |2.882416086694105e-13| \
+  reserve_cruise\
+    const_settings\
+      propulsor_active         |3.3166247903554|       \
+    ode_integ_phase\
+      fltcond|h_final          [4592.29845523]         \
+      fltcond|h                |15197.284632968885|    \
+      range_final              [4003775.34946849]      \
+      range                    |13011350.999531122|    \
+    atmos\
+      temp\
+        fltcond|T              |856.9363575725331|     \
+      pressure\
+        fltcond|p              |189396.2910269731|     \
+      density\
+        fltcond|rho            |2.5535801408593084|    \
+      speedofsound\
+        fltcond|a              |1068.7381152343316|    \
+      trueair\
+        fltcond|Utrue          |538.042344238862|      \
+      dynamicpressure\
+        fltcond|q              |33601.55810619324|     \
+      machnumber\
+        fltcond|M              |1.6697118536502549|    \
+    gs\
+      fltcond|groundspeed      |538.0423400180731|     \
+      fltcond|cosgamma         |3.3166247643374107|    \
+      fltcond|singamma         |0.0004154320848258891| \
+    acmodel\
+      propmodel\
+        thrust                 |15931.243482260963|    \
+        fuel_flow              |2.537440642320636|     \
+        T4                     |7955.99500489914|      \
+      doubler\
+        fuel_flow              |2.4016242971038833|    \
+        thrust                 |147.8698145229838|     \
+      intfuel\
+        fuel_used_final        [17379.16608252]        \
+        fuel_used              |56446.439485372706|    \
+      drag\
+        training_data\
+          CL_train             |12.908673310159188|    \
+          CD_train             |1.525136042413223|     \
+        aero_surrogate\
+          CL                   |1.8974661977701381|    \
+          CD                   |0.12622035640923807|   \
+        drag_calc\
+          drag                 |147591.9002950118|     \
+      weight\
+        weight                 |226248.9112996914|     \
+      Cl_diff\
+        CL_diff                |1.0944775736269479|    \
+    clcomp\
+      fltcond|CL               |1.8974661977701388|    \
+    lift\
+      lift                     |2218743.868591616|     \
+    haccel\
+      accel_horiz              |1.4926248159071983e-13|\
+  reserve_descent\
+    const_settings\
+      propulsor_active         |3.3166247903554|       \
+    ode_integ_phase\
+      fltcond|h_final          [0.]                    \
+      fltcond|h                |9010.740238312532|     \
+      range_final              [4167000.]              \
+      range                    |13560229.328917002|    \
+    atmos\
+      temp\
+        fltcond|T              |906.7586882630161|     \
+      pressure\
+        fltcond|p              |261658.78988279056|    \
+      density\
+        fltcond|rho            |3.301321015895627|     \
+      speedofsound\
+        fltcond|a              |1099.039689553308|     \
+      trueair\
+        fltcond|Utrue          |480.8849908752084|     \
+      dynamicpressure\
+        fltcond|q              |33601.55810619323|     \
+      machnumber\
+        fltcond|M              |1.455746673678632|     \
+    gs\
+      fltcond|groundspeed      |480.69605510452163|    \
+      fltcond|cosgamma         |3.3152932474470274|    \
+      fltcond|singamma         |0.09397171612854761|   \
+    acmodel\
+      propmodel\
+        thrust                 |9071.558292255731|     \
+        fuel_flow              |1.7705114430401514|    \
+        T4                     |6938.648506442942|     \
+      doubler\
+        fuel_flow              |1.6757449332950274|    \
+        thrust                 |84.19993352081502|     \
+      intfuel\
+        fuel_used_final        [17948.74127826]        \
+        fuel_used              |58583.407168816935|    \
+      drag\
+        training_data\
+          CL_train             |12.908673310159188|    \
+          CD_train             |1.525136042413223|     \
+        aero_surrogate\
+          CL                   |1.8787688844352541|    \
+          CD                   |0.1249771328478831|    \
+        drag_calc\
+          drag                 |146138.17497580106|    \
+      weight\
+        weight                 |224109.39517243498|    \
+      Cl_diff\
+        CL_diff                |1.1131643691591737|    \
+    clcomp\
+      fltcond|CL               |1.8787688844352548|    \
+    lift\
+      lift                     |2196880.7390298555|    \
+    haccel\
+      accel_horiz              |1.542364925068664e-13| \
+  resrange\
+    reserverange               [200.]                  \
+  loiter\
+    loiter_dt\
+      duration                 [1800.]                 \
+    const_settings\
+      propulsor_active         |3.3166247903554|       \
+    ode_integ_phase\
+      fltcond|h_final          [457.2]                 \
+      fltcond|h                |1516.360854150489|     \
+      range_final              [4356335.99302819]      \
+      range                    |14135748.58886923|     \
+    atmos\
+      temp\
+        fltcond|T              |945.862254036834|      \
+      pressure\
+        fltcond|p              |318235.950294428|      \
+      density\
+        fltcond|rho            |3.8872997679536394|    \
+      speedofsound\
+        fltcond|a              |1122.822130375172|     \
+      trueair\
+        fltcond|Utrue          |348.86469343546673|    \
+      dynamicpressure\
+        fltcond|q              |21504.997187963672|    \
+      machnumber\
+        fltcond|M              |1.0304867168419594|    \
+    gs\
+      fltcond|groundspeed      |348.86469343546673|    \
+      fltcond|cosgamma         |3.3166247903554|       \
+      fltcond|singamma         |0.0|                   \
+    acmodel\
+      propmodel\
+        thrust                 |13086.17232950241|     \
+        fuel_flow              |2.0837788051753563|    \
+        T4                     |7024.763769766813|     \
+      doubler\
+        fuel_flow              |1.972244680262697|     \
+        thrust                 |121.46257618458681|    \
+      intfuel\
+        fuel_used_final        [19019.11265538]        \
+        fuel_used              |61316.779053909646|    \
+      drag\
+        training_data\
+          CL_train             |12.908673310159188|    \
+          CD_train             |1.525136042413223|     \
+        aero_surrogate\
+          CL                   |2.901057981519947|     \
+          CD                   |0.16230406302952682|   \
+        drag_calc\
+          drag                 |121462.57618458629|    \
+      weight\
+        weight                 |221385.32510220777|    \
+      Cl_diff\
+        CL_diff                |0.09207667838474258|   \
+    clcomp\
+      fltcond|CL               |2.9010579815199464|    \
+    lift\
+      lift                     |2171048.3984135655|    \
+    haccel\
+      accel_horiz              |6.973605910509705e-14| \
+mission_duration\
+  total_block_time             [18544.17795461]        \
+COC\
+  aircraft_cost\
+    C_aircraft                 [62947938.42578838]     \
+  engine_cost\
+    C_engine                   [16372242.74814302]     \
+  crew_cost\
+    C_crew                     [5046.41059639]         \
+  attendant_cost\
+    C_attendants               [2138.76185743]         \
+  fuel_cost\
+    C_fuel                     [21033.72065296]        \
+  oil_cost\
+    C_oil                      [309.80776809]          \
+  landing_cost\
+    C_landing                  [487.62297345]          \
+  nav_cost\
+    C_nav                      [832.39053185]          \
+  airfram_cost\
+    C_airframe                 [46575695.67764536]     \
+  airframe_labor\
+    C_ml                       [222.5352126]           \
+  airframe_materials\
+    C_mm                       [421.40499585]          \
+  engine_materials\
+    C_mm_engine                [90.86263485]           \
+  engine_labor\
+    C_ml_engine                [17.88497114]           \
+  total_aircraft_maintanance\
+    C_aircraft_maintanance     [4437.39214802]         \
+  COC\
+    COC                        [34286.10652818]        \
+\
+\
+29 Implicit Output(s) in 'model'\
+\
+varname                val                 \
+---------------------  --------------------\
+analysis\
+  bfl\
+    takeoff|v1         [79.30136047]       \
+  v0v1\
+    acmodel\
+      drag\
+        alpha_bal\
+          alpha        |7.466704176451886| \
+    v1constraint\
+      duration         [31.33651192]       \
+  v1vr\
+    acmodel\
+      drag\
+        alpha_bal\
+          alpha        |7.466704176451884| \
+    vrconstraint\
+      duration         [6.55909913]        \
+  rotate\
+    acmodel\
+      drag\
+        alpha_bal\
+          alpha        |48.49226090547077| \
+  v1v0\
+    acmodel\
+      drag\
+        alpha_bal\
+          alpha        |7.466704176451887| \
+    v0constraint\
+      duration         [20.13796089]       \
+  engineoutclimb\
+    acmodel\
+      drag\
+        alpha_bal\
+          alpha        [13.04005448]       \
+  climb\
+    climbdt\
+      duration         [1364.06896552]     \
+    acmodel\
+      drag\
+        alpha_bal\
+          alpha        |22.53498437815783| \
+    steadyflt\
+      throttle         |2.9372569992371016|\
+  cruise\
+    cruisedt\
+      duration         [10952.99520199]    \
+    acmodel\
+      drag\
+        alpha_bal\
+          alpha        |11.898845155855934|\
+    steadyflt\
+      throttle         |2.89397226676749|  \
+  descent\
+    descentdt\
+      duration         [6227.1137871]      \
+    acmodel\
+      drag\
+        alpha_bal\
+          alpha        |11.820831200072528|\
+    steadyflt\
+      throttle         |1.2607473529369697|\
+  reserve_climb\
+    reserve_climbdt\
+      duration         [339.62264151]      \
+    acmodel\
+      drag\
+        alpha_bal\
+          alpha        |14.996858251124843|\
+    steadyflt\
+      throttle         |2.455494762753447| \
+  reserve_cruise\
+    reserve_cruisedt\
+      duration         [998.93972588]      \
+    acmodel\
+      drag\
+        alpha_bal\
+          alpha        |10.847828725662986|\
+    steadyflt\
+      throttle         |1.2724898799637545|\
+  reserve_descent\
+    reserve_descentdt\
+      duration         [1129.99469863]     \
+    acmodel\
+      drag\
+        alpha_bal\
+          alpha        |10.628126065042036|\
+    steadyflt\
+      throttle         |0.5969956974106712|\
+  loiter\
+    acmodel\
+      drag\
+        alpha_bal\
+          alpha        |22.699125256127306|\
+    steadyflt\
+      throttle         |0.6355764388877062|\
+}

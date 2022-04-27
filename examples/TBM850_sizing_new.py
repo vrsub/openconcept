@@ -17,7 +17,8 @@ from examples.methods.weights_turboprop import SingleTurboPropEmptyWeight
 from examples.propulsion_layouts.simple_turboprop import TurbopropPropulsionSystem
 from examples.methods.costs_commuter import OperatingCost
 from openconcept.utilities.dict_indepvarcomp import DictIndepVarComp
-from examples.sizing_functions import HStabSizing_SmallTurboprop, VStabSizing_SmallTurboprop, WingMAC_Trapezoidal, WingRoot_LinearTaper
+from examples.sizing_functions import HStabSizing_SmallTurboprop, VStabSizing_SmallTurboprop, WingMAC_Trapezoidal, WingRoot_LinearTaper, CL_MAX_cruise
+from examples.methods.drag_buildup import Cd0_NonWing_JetTransport
 
 from examples.aircraft_data.TBM850 import data as acdata
 from openconcept.analysis.performance.mission_profiles import FullMissionAnalysis, FullMissionWithReserve
@@ -84,12 +85,18 @@ class TBM850AirplaneModel(Group):
                                                      scaling_factors=[1,1,1, -1]),
                            promotes_inputs=['*'],
                            promotes_outputs=['weight'])
-
-def Cl_calc(weight, wing_area, Vstall):
-    rho = 1.22527
-    Cl_max = 2*weight/(rho*(Vstall*0.514444)**2*wing_area)
-    return Cl_max
-
+        
+        self.add_subsystem(
+            "Cl_diff",
+            AddSubtractComp(
+                output_name="CL_diff",
+                input_names=["ac|aero|CL_max", "fltcond|CL"],
+                vec_size=[1, nn],
+                scaling_factors=[1, -1],
+            ),
+            promotes_inputs=["*"],
+            promotes_outputs=["*"],
+        )
 
 class TBMAnalysisGroup(Group):
     """This is an example of a balanced field takeoff and three-phase mission analysis.
@@ -104,7 +111,8 @@ class TBMAnalysisGroup(Group):
         dv_comp.add_output_from_dict('ac|aero|CLmax_TO')
         dv_comp.add_output_from_dict('ac|aero|polar|e')
         dv_comp.add_output_from_dict('ac|aero|polar|CD0_TO')
-        dv_comp.add_output_from_dict('ac|aero|polar|CD0_cruise')
+        dv_comp.add_output_from_dict("ac|aero|Cl_max")
+        # dv_comp.add_output_from_dict('ac|aero|polar|CD0_cruise')
         
 
         dv_comp.add_output_from_dict('ac|geom|wing|S_ref')
@@ -154,6 +162,13 @@ class TBMAnalysisGroup(Group):
                             promotes_inputs=['*'],
                             promotes_outputs=[('vstab_area','ac|geom|vstab|S_ref')])
         
+        self.add_subsystem(
+            "cd0_estimation",
+            Cd0_NonWing_JetTransport(),
+            promotes_inputs=["*"],
+            promotes_outputs=[("C_d0", "ac|aero|polar|CD0_cruise")],
+        )
+        
         self.add_subsystem('OEW', SingleTurboPropEmptyWeight(),
                            promotes_inputs=['*', ('P_TO', 'ac|propulsion|engine|rating')],
                            promotes_outputs=[('OEW','ac|weights|OEW')])
@@ -164,6 +179,10 @@ class TBMAnalysisGroup(Group):
                                                      scaling_factors=[1,1,1]),
                            promotes_outputs=['ac|weights|MTOW'],
                            promotes_inputs=['*'])
+
+        self.add_subsystem(
+            "CL_max", CL_MAX_cruise(), promotes_inputs=["*"], promotes_outputs=[("Wing_CL_max", "ac|aero|CL_max")]
+        )
         
         analysis = self.add_subsystem('analysis',
                                       FullMissionWithReserve(num_nodes=nn,
@@ -197,6 +216,7 @@ def run_tbm_analysis():
     prob.driver.opt_settings['limited_memory_max_history']=1000
     prob.driver.opt_settings['tol'] = 1e-5
     prob.driver.opt_settings['constr_viol_tol'] = 1e-6
+    prob.driver.hist_file('TBM850_fullsizing_fuelburn.hst')
     prob.model.add_design_var('ac|geom|wing|S_ref', lower = 10, upper=30, units='m**2')
     prob.model.add_design_var('ac|propulsion|engine|rating', lower = 500, upper=1500, units='hp', ref=800)
     prob.model.add_design_var('ac|geom|wing|c4sweep', lower = -2, upper=15, units='deg', ref=1)
@@ -211,10 +231,13 @@ def run_tbm_analysis():
     prob.model.add_constraint('descent.throttle', upper=1.0)
 
     # sizing CL constraint (CL<CL_max of wing)
-    # prob.model.add_constraint('climb.fltcond|CL', upper=2.4476)
-    prob.model.add_constraint('climb.fltcond|CL', upper=1.5) # climb is the only active constraint, need a stall condition on wing, some fxn(climb.fltcond|vs, climb.fltcond|Ueas), can we define max climb rate, stall depends on airfoil selection
-    prob.model.add_constraint('cruise.fltcond|CL', upper=0.7)
-    prob.model.add_constraint('descent.fltcond|CL', upper=1.4)
+    prob.model.add_constraint("climb.CL_diff", lower=0)
+    prob.model.add_constraint("cruise.CL_diff", lower=0)
+    prob.model.add_constraint("descent.CL_diff", lower=0)
+    prob.model.add_constraint("reserve_climb.CL_diff", lower=0)
+    prob.model.add_constraint("reserve_cruise.CL_diff", lower=0)
+    prob.model.add_constraint("reserve_descent.CL_diff", lower=0)
+    prob.model.add_constraint("loiter.CL_diff", lower=0)
     prob.model.add_constraint('rotate.range_final', upper=1000)
     prob.model.add_constraint('v1v0.range_final', upper=1000)
     prob.driver.options['debug_print'] = ['desvars','objs','nl_cons']
@@ -254,7 +277,7 @@ def run_tbm_analysis():
     prob['rotate.throttle'] = np.ones((num_nodes)) / 1.21
 
     prob.run_driver()
-    # om.n2(prob,outfile = 'full_mission_sizing.html')
+    om.n2(prob,outfile = 'TBM850_fullsizing_fuelburn.html')
     return prob
 
 if __name__ == "__main__":

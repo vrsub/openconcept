@@ -335,6 +335,7 @@ def configure_problem():
     prob.driver.opt_settings["limited_memory_max_history"] = 1000
     prob.driver.opt_settings["tol"] = 1e-5
     prob.driver.opt_settings["constr_viol_tol"] = 1e-9
+    prob.driver.hist_file = 'B738_fullsizing_highCl_BFL_COC.hst'
 
     prob.model.add_design_var("ac|geom|wing|S_ref", lower=100, upper=200, units="m**2")
     prob.model.add_design_var("ac|propulsion|engine|rating", lower=20000, upper=35000, units="lbf")
@@ -344,8 +345,8 @@ def configure_problem():
     )
     prob.model.add_design_var("ac|geom|wing|c4sweep", lower=-2, upper=50, units="deg", ref=1)
     prob.model.add_design_var("ac|geom|wing|taper", lower=0, upper=1, ref=1)
-    # prob.model.add_objective("COC.COC")
-    prob.model.add_objective("descent.fuel_used_final")
+    prob.model.add_objective("COC")
+    # prob.model.add_objective("descent.fuel_used_final")
 
     prob.model.add_constraint("ac|geom|wing|span", upper=36, units="m")
 
@@ -364,6 +365,9 @@ def configure_problem():
     prob.model.add_constraint("reserve_cruise.CL_diff", lower=0)
     prob.model.add_constraint("reserve_descent.CL_diff", lower=0)
     prob.model.add_constraint("loiter.CL_diff", lower=0)
+
+    prob.model.add_constraint('rotate.range_final', upper=6000)
+    prob.model.add_constraint('v1v0.range_final', upper=6000)
 
     prob.driver.options["debug_print"] = ["desvars", "objs", "nl_cons"]
 
@@ -445,7 +449,7 @@ def run_738_analysis(plots=True):
     # prob.run_model()
     prob.run_driver()
     prob.model.list_outputs()
-    om.n2(prob, outfile="B738_sizing.html")
+    om.n2(prob, outfile="B738_fullsizing_highCl_BFL_COC.html")
     if plots:
         show_outputs(prob)
     return prob

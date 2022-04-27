@@ -8,6 +8,7 @@ ac = dict()
 # ==AERO==================================
 aero = dict()
 aero['CLmax_TO']   = {'value' : 1.7}
+aero['Cl_max']     = {'value': 0.9}
 
 polar = dict()
 polar['e']              = {'value' : 0.78}

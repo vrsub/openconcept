@@ -10,7 +10,7 @@ aero = dict()
 aero['CLmax_TO']   = {'value' : 2.0}
 aero['LoverD']     = {'value': 17}
 aero['Vstall_land'] = {'value': 100, 'units':'kn'}
-aero['Cl_max'] = {'value': 1.30}
+aero['Cl_max'] = {'value': 1.1}
 
 polar = dict()
 polar['e']              = {'value' : 0.801}

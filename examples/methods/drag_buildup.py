@@ -94,7 +94,7 @@ class SkinFrictionNonWing_JetTransport(ExplicitComponent):
 
     def compute(self, inputs, outputs):
         C_fe = self.options["C_fe"]
-        Cd0_roskam = (C_fe * inputs["S_wet"]) / inputs["ac|geom|wing|S_ref"] - C_fe
+        Cd0_roskam = (C_fe * inputs["S_wet"]) / inputs["ac|geom|wing|S_ref"] #- C_fe
         outputs["C_d0"] = Cd0_roskam
 
     def compute_partials(self, inputs, J):
