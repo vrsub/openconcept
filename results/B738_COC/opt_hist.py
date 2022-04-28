@@ -22,8 +22,8 @@ print(histVals.keys())
 # print(histVals)
 
 plt.figure(figsize=(8, 6))
-plt.plot(histVals['analysis.descent.acmodel.intfuel.fuel_used_final'], '-o')
-plt.ylabel('Obj: Fuel Burn')
+plt.plot(histVals['COC.COC.COC'], '-o')
+plt.ylabel('Obj: COC [\$]')
 plt.xlabel('Major Iteration Number')
 # fig, axes = plt.subplots(nrows=6, sharex=True, constrained_layout=True, figsize=(14, 10))
 
@@ -48,4 +48,4 @@ plt.xlabel('Major Iteration Number')
 #     ax.spines["left"].set_position(("outward", 12))
 #     ax.spines["bottom"].set_position(("outward", 12))
 
-plt.savefig(os.path.join(args.outputDir, "737_fuel_obj.png"))
+plt.savefig(os.path.join(args.outputDir, "737_COC_obj.png"))

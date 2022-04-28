@@ -58,9 +58,7 @@ class B738AirplaneModel(oc.IntegratorGroup):
 
         self.add_subsystem("propmodel", CFM56(num_nodes=nn, plot=False), promotes_inputs=propulsion_promotes_inputs)
 
-        # print(flight_phase)
-        # print(nn)
-
+        # doubles outputs from propulsion model to scale for twin engine aircraft
         doubler = om.ExecComp(
             [
                 "thrust=2*thrust_in*0.5*(1+propulsor_active)*(rating/27000)",
@@ -71,7 +69,6 @@ class B738AirplaneModel(oc.IntegratorGroup):
             fuel_flow={
                 "val": 1.0 * np.ones((nn,)),
                 "units": "kg/s",
-                # "tags": ["integrate", "state_name:fuel_used", "state_units:kg", "state_val:1.0", "state_promotes:True"],
             },
             propulsor_active={"val": 1.0 * np.ones((nn,))},
             rating={"val": 27000, "units": "lbf"},
@@ -102,16 +99,11 @@ class B738AirplaneModel(oc.IntegratorGroup):
         else:
             cd0_source = "ac|aero|polar|CD0_TO"
 
-        # self.add_subsystem('drag', PolarDrag(num_nodes=nn),
-        #                    promotes_inputs=['fltcond|CL', 'ac|geom|*', ('CD0', cd0_source),
-        #                                     'fltcond|q', ('e', 'ac|aero|polar|e')],
-        #                    promotes_outputs=['drag'])
-
         oas_surf_dict = {}  # options for OpenAeroStruct
         oas_surf_dict["t_over_c"] = acdata["ac"]["geom"]["wing"]["toverc"]["value"]
         self.add_subsystem(
             "drag",
-            OASDragPolar(num_nodes=nn, num_x=4, num_y=10, num_twist=5, surf_options=oas_surf_dict),
+            OASDragPolar(num_nodes=nn, num_x=4, num_y=10, num_twist=5, surf_options=oas_surf_dict), # OpenAeroStruct function call for VLM drag computation
             promotes_inputs=[
                 "fltcond|CL",
                 "fltcond|M",
@@ -124,6 +116,7 @@ class B738AirplaneModel(oc.IntegratorGroup):
         )
         self.set_input_defaults("ac|geom|wing|twist", np.zeros(5), units="deg")
 
+        # compute aircraft weight over each flight segment
         self.add_subsystem(
             "weight",
             oc.AddSubtractComp(
@@ -137,6 +130,7 @@ class B738AirplaneModel(oc.IntegratorGroup):
             promotes_outputs=["weight"],
         )
 
+        # computes the difference between flight CL and CL_max to ensure aircraft does not exceed CL_max
         self.add_subsystem(
             "Cl_diff",
             oc.AddSubtractComp(
@@ -148,16 +142,7 @@ class B738AirplaneModel(oc.IntegratorGroup):
             promotes_inputs=["*"],
             promotes_outputs=["*"],
         )
-        # vstall_calc = om.ExecComp(['V_stall_mission=((2*weight)/(fltcond|rho*fltcond|CL))**0.5'],
-        #           weight={'val': 1.0*np.ones((nn,)),
-        #              'units': 'kN'},
-        #           fltcon|rho={'val': 1.0*np.ones((nn,)),
-        #                'units': 'kN'},
-        #           fuel_flow={'val': 1.0*np.ones((nn,)),
-        #              'units': 'kg/s',
-        #              'tags': ['integrate', 'state_name:fuel_used', 'state_units:kg', 'state_val:1.0', 'state_promotes:True']},
-        #           fuel_flow_in={'val': 1.0*np.ones((nn,)),
-        #                'units': 'kg/s'})
+
 
 
 class B738AnalysisGroup(om.Group):
@@ -170,7 +155,6 @@ class B738AnalysisGroup(om.Group):
         dv_comp.add_output_from_dict("ac|aero|CLmax_TO")
         dv_comp.add_output_from_dict("ac|aero|polar|e")
         dv_comp.add_output_from_dict("ac|aero|polar|CD0_TO")
-        # dv_comp.add_output_from_dict('ac|aero|polar|CD0_cruise')
         dv_comp.add_output_from_dict("ac|aero|Vstall_land")
         dv_comp.add_output_from_dict("ac|aero|LoverD")
         dv_comp.add_output_from_dict("ac|aero|Cl_max")
@@ -180,12 +164,10 @@ class B738AnalysisGroup(om.Group):
         dv_comp.add_output_from_dict("ac|geom|wing|c4sweep")
         dv_comp.add_output_from_dict("ac|geom|wing|taper")
         dv_comp.add_output_from_dict("ac|geom|wing|toverc")
-        # dv_comp.add_output_from_dict('ac|geom|hstab|S_ref')
         dv_comp.add_output_from_dict("ac|geom|hstab|c4_to_wing_c4")
         dv_comp.add_output_from_dict("ac|geom|hstab|AR")
         dv_comp.add_output_from_dict("ac|geom|hstab|c4sweep")
         dv_comp.add_output_from_dict("ac|geom|hstab|taper")
-        # dv_comp.add_output_from_dict('ac|geom|vstab|S_ref')
         dv_comp.add_output_from_dict("ac|geom|vstab|AR")
         dv_comp.add_output_from_dict("ac|geom|vstab|toverc")
         dv_comp.add_output_from_dict("ac|geom|vstab|c4sweep")
@@ -200,10 +182,7 @@ class B738AnalysisGroup(om.Group):
         dv_comp.add_output_from_dict("ac|geom|maingear|length")
         dv_comp.add_output_from_dict("ac|geom|maingear|n_wheels")
 
-        # dv_comp.add_output_from_dict('ac|weights|MTOW')
-        # dv_comp.add_output_from_dict('ac|weights|W_fuel_max')
         dv_comp.add_output_from_dict("ac|weights|MLW")
-        # dv_comp.add_output_from_dict('ac|weights|OEW')
 
         dv_comp.add_output_from_dict("ac|weights|max_payload")
 
@@ -213,9 +192,7 @@ class B738AnalysisGroup(om.Group):
         dv_comp.add_output_from_dict("ac|num_passengers_max")
         dv_comp.add_output_from_dict("ac|q_cruise")
 
-        # self.set_input_defaults('cd0_estimation.ac|weights|MTOW', 79002, units='kg')
-        # self.set_input_defaults('cd0_estimation.ac|geom|wing|S_ref', 124.6, units='m**2')
-
+        # The follow subsystems compute all geometry parameters that are dependent on wing area and other defined geometry
         self.add_subsystem(
             "Wing_Root",
             WingRoot_LinearTaper(),
@@ -252,6 +229,7 @@ class B738AnalysisGroup(om.Group):
             promotes_outputs=[("C_d0", "ac|aero|polar|CD0_cruise")],
         )
 
+        # calls empty weight build up function to store operating empty weight
         self.add_subsystem(
             "OEW",
             JetTransportEmptyWeight(),
@@ -263,6 +241,7 @@ class B738AnalysisGroup(om.Group):
             ],
         )
 
+        # computes aircraft MTOW in the top level model based on implicitly solved fuel burn
         self.add_subsystem(
             "MTOW",
             oc.AddSubtractComp(
@@ -286,8 +265,8 @@ class B738AnalysisGroup(om.Group):
         self.add_subsystem(
             "CL_max", CL_MAX_cruise(), promotes_inputs=["*"], promotes_outputs=[("Wing_CL_max", "ac|aero|CL_max")]
         )
-        # self.add_subsystem('WingStallSpeed', StallSpeed_wing(), promotes_inputs=['*'], promotes_outputs=['*'])
 
+        # Runs mission analysis for aircraft model
         analysis = self.add_subsystem(
             "analysis",
             FullMissionWithReserve(num_nodes=nn, aircraft_model=B738AirplaneModel),
@@ -295,6 +274,7 @@ class B738AnalysisGroup(om.Group):
             promotes_outputs=["*"],
         )
 
+        # the following sections comptue cash operating cost
         self.add_subsystem(
             "mission_duration",
             oc.AddSubtractComp(
@@ -331,12 +311,14 @@ def configure_problem():
     prob.model.nonlinear_solver.options["rtol"] = 1e-6
     prob.model.nonlinear_solver.linesearch = om.ArmijoGoldsteinLS(bound_enforcement="scalar", print_bound_enforce=True)
 
+    # declare optimization driver and history files
     prob.driver = om.pyOptSparseDriver(optimizer="IPOPT")
     prob.driver.opt_settings["limited_memory_max_history"] = 1000
     prob.driver.opt_settings["tol"] = 1e-5
     prob.driver.opt_settings["constr_viol_tol"] = 1e-9
-    prob.driver.hist_file = 'B738_fullsizing_highCl_BFL_COC.hst'
-
+    prob.driver.hist_file = "B738_fullsizing_highCl_BFL_COC.hst"
+    
+    # define design variables
     prob.model.add_design_var("ac|geom|wing|S_ref", lower=100, upper=200, units="m**2")
     prob.model.add_design_var("ac|propulsion|engine|rating", lower=20000, upper=35000, units="lbf")
     prob.model.add_design_var("ac|geom|wing|AR", lower=5, upper=15)
@@ -345,11 +327,13 @@ def configure_problem():
     )
     prob.model.add_design_var("ac|geom|wing|c4sweep", lower=-2, upper=50, units="deg", ref=1)
     prob.model.add_design_var("ac|geom|wing|taper", lower=0, upper=1, ref=1)
+    
+    # define objective functions
     prob.model.add_objective("COC")
     # prob.model.add_objective("descent.fuel_used_final")
 
+    # define constraints for optimizer
     prob.model.add_constraint("ac|geom|wing|span", upper=36, units="m")
-
     prob.model.add_constraint("climb.throttle", upper=1.0)  # these constraints limit throttle
     prob.model.add_constraint("cruise.throttle", upper=1.0)
     prob.model.add_constraint("descent.throttle", upper=1.0)
@@ -366,8 +350,8 @@ def configure_problem():
     prob.model.add_constraint("reserve_descent.CL_diff", lower=0)
     prob.model.add_constraint("loiter.CL_diff", lower=0)
 
-    prob.model.add_constraint('rotate.range_final', upper=6000)
-    prob.model.add_constraint('v1v0.range_final', upper=6000)
+    prob.model.add_constraint("rotate.range_final", upper=6000)
+    prob.model.add_constraint("v1v0.range_final", upper=6000)
 
     prob.driver.options["debug_print"] = ["desvars", "objs", "nl_cons"]
 
@@ -446,10 +430,10 @@ def run_738_analysis(plots=True):
     prob = configure_problem()
     prob.setup(check=True, mode="fwd")
     set_values(prob, num_nodes)
-    # prob.run_model()
-    prob.run_driver()
+    prob.run_model()
+    # prob.run_driver()
     prob.model.list_outputs()
-    om.n2(prob, outfile="B738_fullsizing_highCl_BFL_COC.html")
+    om.n2(prob, outfile="B738_fullsizing_originaldesign.html")
     if plots:
         show_outputs(prob)
     return prob

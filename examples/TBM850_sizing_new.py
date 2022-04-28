@@ -216,12 +216,12 @@ def run_tbm_analysis():
     prob.driver.opt_settings['limited_memory_max_history']=1000
     prob.driver.opt_settings['tol'] = 1e-5
     prob.driver.opt_settings['constr_viol_tol'] = 1e-6
-    prob.driver.hist_file('TBM850_fullsizing_fuelburn.hst')
+    prob.driver.hist_file = 'TBM850_fullsizing_fuelburn_longBFL.hst'
     prob.model.add_design_var('ac|geom|wing|S_ref', lower = 10, upper=30, units='m**2')
-    prob.model.add_design_var('ac|propulsion|engine|rating', lower = 500, upper=1500, units='hp', ref=800)
+    prob.model.add_design_var('ac|propulsion|engine|rating', lower = 500, upper=1500, units='hp', ref=1)
     prob.model.add_design_var('ac|geom|wing|c4sweep', lower = -2, upper=15, units='deg', ref=1)
     prob.model.add_design_var('ac|geom|wing|twist', lower = np.array([0,-5,-5,-5,-5]), upper=np.array([0,5,5,5,5]), units='deg', ref=1)
-    prob.model.add_design_var('ac|geom|wing|AR', lower = 8, upper=20, ref=8.95)
+    prob.model.add_design_var('ac|geom|wing|AR', lower = 8, upper=20, ref=1)
     prob.model.add_design_var("ac|geom|wing|taper", lower=0, upper=1, ref=1)
     prob.model.add_objective('descent.fuel_used_final')
 
@@ -238,8 +238,8 @@ def run_tbm_analysis():
     prob.model.add_constraint("reserve_cruise.CL_diff", lower=0)
     prob.model.add_constraint("reserve_descent.CL_diff", lower=0)
     prob.model.add_constraint("loiter.CL_diff", lower=0)
-    prob.model.add_constraint('rotate.range_final', upper=1000)
-    prob.model.add_constraint('v1v0.range_final', upper=1000)
+    prob.model.add_constraint('rotate.range_final', upper=1000, units='m')
+    prob.model.add_constraint('v1v0.range_final', upper=1000, units='m')
     prob.driver.options['debug_print'] = ['desvars','objs','nl_cons']
     # prob.driver.options['tol'] = 1e-06
 
@@ -277,7 +277,7 @@ def run_tbm_analysis():
     prob['rotate.throttle'] = np.ones((num_nodes)) / 1.21
 
     prob.run_driver()
-    om.n2(prob,outfile = 'TBM850_fullsizing_fuelburn.html')
+    om.n2(prob,outfile = 'TBM850_fullsizing_fuelburn_longBFL.html')
     return prob
 
 if __name__ == "__main__":

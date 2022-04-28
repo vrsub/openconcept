@@ -1,0 +1,204 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2636
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Optimization Problem -- Optimization using pyOpt_sparse\
+================================================================================\
+    Objective Function: _objfunc\
+\
+    Solution: \
+--------------------------------------------------------------------------------\
+    Total Time:                  459.2297\
+       User Objective Time :     452.9714\
+       User Sensitivity Time :     5.6028\
+       Interface Time :            0.3815\
+       Opt Solver Time:            0.2739\
+    Calls to Objective Function :      30\
+    Calls to Sens Function :           27\
+\
+\
+   Objectives\
+      Index  Name                                                        Value\
+          0  analysis.descent.acmodel.intfuel.fuel_used_final     5.934036E+02\
+\
+   Variables (c - continuous, i - integer, d - discrete)\
+      Index  Name                                    Type      Lower Bound            Value      Upper Bound     Status\
+          0  dv_comp.ac|geom|wing|S_ref_0               c     1.000000E+01     1.839377E+01     3.000000E+01           \
+          1  dv_comp.ac|propulsion|engine|rating_0      c     6.250000E-01     8.421211E-01     1.875000E+00           \
+          2  dv_comp.ac|geom|wing|c4sweep_0             c    -2.000000E+00     6.324099E-01     1.500000E+01           \
+          3  ac|geom|wing|twist_0                       c     0.000000E+00     0.000000E+00     0.000000E+00         lu\
+          4  ac|geom|wing|twist_1                       c    -5.000000E+00     8.670631E-01     5.000000E+00           \
+          5  ac|geom|wing|twist_2                       c    -5.000000E+00     1.071352E+00     5.000000E+00           \
+          6  ac|geom|wing|twist_3                       c    -5.000000E+00     7.347377E-01     5.000000E+00           \
+          7  ac|geom|wing|twist_4                       c    -5.000000E+00     6.064528E-01     5.000000E+00           \
+          8  dv_comp.ac|geom|wing|AR_0                  c     8.938547E-01     8.938547E-01     2.234637E+00          l\
+          9  dv_comp.ac|geom|wing|taper_0               c     0.000000E+00     5.056231E-01     1.000000E+00           \
+\
+   Constraints (i - inequality, e - equality)\
+      Index  Name                                             Type          Lower           Value           Upper    Status  Lagrange Multiplier (N/A)\
+          0  analysis.climb.steadyflt.throttle                   i  -1.000000E+30    1.000000E+00    1.000000E+00         u    9.00000E+100\
+          1  analysis.climb.steadyflt.throttle                   i  -1.000000E+30    9.915193E-01    1.000000E+00              9.00000E+100\
+          2  analysis.climb.steadyflt.throttle                   i  -1.000000E+30    9.833268E-01    1.000000E+00              9.00000E+100\
+          3  analysis.climb.steadyflt.throttle                   i  -1.000000E+30    9.754050E-01    1.000000E+00              9.00000E+100\
+          4  analysis.climb.steadyflt.throttle                   i  -1.000000E+30    9.677613E-01    1.000000E+00              9.00000E+100\
+          5  analysis.climb.steadyflt.throttle                   i  -1.000000E+30    9.604557E-01    1.000000E+00              9.00000E+100\
+          6  analysis.climb.steadyflt.throttle                   i  -1.000000E+30    9.537908E-01    1.000000E+00              9.00000E+100\
+          7  analysis.climb.steadyflt.throttle                   i  -1.000000E+30    9.483337E-01    1.000000E+00              9.00000E+100\
+          8  analysis.climb.steadyflt.throttle                   i  -1.000000E+30    9.448230E-01    1.000000E+00              9.00000E+100\
+          9  analysis.climb.steadyflt.throttle                   i  -1.000000E+30    9.441428E-01    1.000000E+00              9.00000E+100\
+         10  analysis.climb.steadyflt.throttle                   i  -1.000000E+30    9.471609E-01    1.000000E+00              9.00000E+100\
+         11  analysis.cruise.steadyflt.throttle                  i  -1.000000E+30    8.583565E-01    1.000000E+00              9.00000E+100\
+         12  analysis.cruise.steadyflt.throttle                  i  -1.000000E+30    8.550552E-01    1.000000E+00              9.00000E+100\
+         13  analysis.cruise.steadyflt.throttle                  i  -1.000000E+30    8.518241E-01    1.000000E+00              9.00000E+100\
+         14  analysis.cruise.steadyflt.throttle                  i  -1.000000E+30    8.486621E-01    1.000000E+00              9.00000E+100\
+         15  analysis.cruise.steadyflt.throttle                  i  -1.000000E+30    8.455684E-01    1.000000E+00              9.00000E+100\
+         16  analysis.cruise.steadyflt.throttle                  i  -1.000000E+30    8.425419E-01    1.000000E+00              9.00000E+100\
+         17  analysis.cruise.steadyflt.throttle                  i  -1.000000E+30    8.395818E-01    1.000000E+00              9.00000E+100\
+         18  analysis.cruise.steadyflt.throttle                  i  -1.000000E+30    8.366873E-01    1.000000E+00              9.00000E+100\
+         19  analysis.cruise.steadyflt.throttle                  i  -1.000000E+30    8.338574E-01    1.000000E+00              9.00000E+100\
+         20  analysis.cruise.steadyflt.throttle                  i  -1.000000E+30    8.310914E-01    1.000000E+00              9.00000E+100\
+         21  analysis.cruise.steadyflt.throttle                  i  -1.000000E+30    8.283886E-01    1.000000E+00              9.00000E+100\
+         22  analysis.descent.steadyflt.throttle                 i  -1.000000E+30    2.074903E-01    1.000000E+00              9.00000E+100\
+         23  analysis.descent.steadyflt.throttle                 i  -1.000000E+30    1.898681E-01    1.000000E+00              9.00000E+100\
+         24  analysis.descent.steadyflt.throttle                 i  -1.000000E+30    1.726842E-01    1.000000E+00              9.00000E+100\
+         25  analysis.descent.steadyflt.throttle                 i  -1.000000E+30    1.558925E-01    1.000000E+00              9.00000E+100\
+         26  analysis.descent.steadyflt.throttle                 i  -1.000000E+30    1.395296E-01    1.000000E+00              9.00000E+100\
+         27  analysis.descent.steadyflt.throttle                 i  -1.000000E+30    1.236631E-01    1.000000E+00              9.00000E+100\
+         28  analysis.descent.steadyflt.throttle                 i  -1.000000E+30    1.083589E-01    1.000000E+00              9.00000E+100\
+         29  analysis.descent.steadyflt.throttle                 i  -1.000000E+30    9.366410E-02    1.000000E+00              9.00000E+100\
+         30  analysis.descent.steadyflt.throttle                 i  -1.000000E+30    7.960137E-02    1.000000E+00              9.00000E+100\
+         31  analysis.descent.steadyflt.throttle                 i  -1.000000E+30    6.617011E-02    1.000000E+00              9.00000E+100\
+         32  analysis.descent.steadyflt.throttle                 i  -1.000000E+30    5.335463E-02    1.000000E+00              9.00000E+100\
+         33  analysis.climb.acmodel.Cl_diff.CL_diff              i   0.000000E+00    1.454451E-01    1.000000E+30              9.00000E+100\
+         34  analysis.climb.acmodel.Cl_diff.CL_diff              i   0.000000E+00    1.462696E-01    1.000000E+30              9.00000E+100\
+         35  analysis.climb.acmodel.Cl_diff.CL_diff              i   0.000000E+00    1.471090E-01    1.000000E+30              9.00000E+100\
+         36  analysis.climb.acmodel.Cl_diff.CL_diff              i   0.000000E+00    1.479625E-01    1.000000E+30              9.00000E+100\
+         37  analysis.climb.acmodel.Cl_diff.CL_diff              i   0.000000E+00    1.488293E-01    1.000000E+30              9.00000E+100\
+         38  analysis.climb.acmodel.Cl_diff.CL_diff              i   0.000000E+00    1.497086E-01    1.000000E+30              9.00000E+100\
+         39  analysis.climb.acmodel.Cl_diff.CL_diff              i   0.000000E+00    1.505999E-01    1.000000E+30              9.00000E+100\
+         40  analysis.climb.acmodel.Cl_diff.CL_diff              i   0.000000E+00    1.515031E-01    1.000000E+30              9.00000E+100\
+         41  analysis.climb.acmodel.Cl_diff.CL_diff              i   0.000000E+00    1.524193E-01    1.000000E+30              9.00000E+100\
+         42  analysis.climb.acmodel.Cl_diff.CL_diff              i   0.000000E+00    1.533502E-01    1.000000E+30              9.00000E+100\
+         43  analysis.climb.acmodel.Cl_diff.CL_diff              i   0.000000E+00    1.542991E-01    1.000000E+30              9.00000E+100\
+         44  analysis.cruise.acmodel.Cl_diff.CL_diff             i   0.000000E+00    5.597001E-01    1.000000E+30              9.00000E+100\
+         45  analysis.cruise.acmodel.Cl_diff.CL_diff             i   0.000000E+00    5.639970E-01    1.000000E+30              9.00000E+100\
+         46  analysis.cruise.acmodel.Cl_diff.CL_diff             i   0.000000E+00    5.682776E-01    1.000000E+30              9.00000E+100\
+         47  analysis.cruise.acmodel.Cl_diff.CL_diff             i   0.000000E+00    5.725421E-01    1.000000E+30              9.00000E+100\
+         48  analysis.cruise.acmodel.Cl_diff.CL_diff             i   0.000000E+00    5.767909E-01    1.000000E+30              9.00000E+100\
+         49  analysis.cruise.acmodel.Cl_diff.CL_diff             i   0.000000E+00    5.810244E-01    1.000000E+30              9.00000E+100\
+         50  analysis.cruise.acmodel.Cl_diff.CL_diff             i   0.000000E+00    5.852428E-01    1.000000E+30              9.00000E+100\
+         51  analysis.cruise.acmodel.Cl_diff.CL_diff             i   0.000000E+00    5.894466E-01    1.000000E+30              9.00000E+100\
+         52  analysis.cruise.acmodel.Cl_diff.CL_diff             i   0.000000E+00    5.936360E-01    1.000000E+30              9.00000E+100\
+         53  analysis.cruise.acmodel.Cl_diff.CL_diff             i   0.000000E+00    5.978114E-01    1.000000E+30              9.00000E+100\
+         54  analysis.cruise.acmodel.Cl_diff.CL_diff             i   0.000000E+00    6.019731E-01    1.000000E+30              9.00000E+100\
+         55  analysis.descent.acmodel.Cl_diff.CL_diff            i   0.000000E+00    3.814061E-01    1.000000E+30              9.00000E+100\
+         56  analysis.descent.acmodel.Cl_diff.CL_diff            i   0.000000E+00    3.818976E-01    1.000000E+30              9.00000E+100\
+         57  analysis.descent.acmodel.Cl_diff.CL_diff            i   0.000000E+00    3.823488E-01    1.000000E+30              9.00000E+100\
+         58  analysis.descent.acmodel.Cl_diff.CL_diff            i   0.000000E+00    3.827606E-01    1.000000E+30              9.00000E+100\
+         59  analysis.descent.acmodel.Cl_diff.CL_diff            i   0.000000E+00    3.831341E-01    1.000000E+30              9.00000E+100\
+         60  analysis.descent.acmodel.Cl_diff.CL_diff            i   0.000000E+00    3.834705E-01    1.000000E+30              9.00000E+100\
+         61  analysis.descent.acmodel.Cl_diff.CL_diff            i   0.000000E+00    3.837712E-01    1.000000E+30              9.00000E+100\
+         62  analysis.descent.acmodel.Cl_diff.CL_diff            i   0.000000E+00    3.840376E-01    1.000000E+30              9.00000E+100\
+         63  analysis.descent.acmodel.Cl_diff.CL_diff            i   0.000000E+00    3.842713E-01    1.000000E+30              9.00000E+100\
+         64  analysis.descent.acmodel.Cl_diff.CL_diff            i   0.000000E+00    3.844739E-01    1.000000E+30              9.00000E+100\
+         65  analysis.descent.acmodel.Cl_diff.CL_diff            i   0.000000E+00    3.846470E-01    1.000000E+30              9.00000E+100\
+         66  analysis.reserve_climb.acmodel.Cl_diff.CL_diff      i   0.000000E+00    2.712091E-01    1.000000E+30              9.00000E+100\
+         67  analysis.reserve_climb.acmodel.Cl_diff.CL_diff      i   0.000000E+00    2.718142E-01    1.000000E+30              9.00000E+100\
+         68  analysis.reserve_climb.acmodel.Cl_diff.CL_diff      i   0.000000E+00    2.724300E-01    1.000000E+30              9.00000E+100\
+         69  analysis.reserve_climb.acmodel.Cl_diff.CL_diff      i   0.000000E+00    2.730559E-01    1.000000E+30              9.00000E+100\
+         70  analysis.reserve_climb.acmodel.Cl_diff.CL_diff      i   0.000000E+00    2.736912E-01    1.000000E+30              9.00000E+100\
+         71  analysis.reserve_climb.acmodel.Cl_diff.CL_diff      i   0.000000E+00    2.743353E-01    1.000000E+30              9.00000E+100\
+         72  analysis.reserve_climb.acmodel.Cl_diff.CL_diff      i   0.000000E+00    2.749878E-01    1.000000E+30              9.00000E+100\
+         73  analysis.reserve_climb.acmodel.Cl_diff.CL_diff      i   0.000000E+00    2.756479E-01    1.000000E+30              9.00000E+100\
+         74  analysis.reserve_climb.acmodel.Cl_diff.CL_diff      i   0.000000E+00    2.763157E-01    1.000000E+30              9.00000E+100\
+         75  analysis.reserve_climb.acmodel.Cl_diff.CL_diff      i   0.000000E+00    2.769911E-01    1.000000E+30              9.00000E+100\
+         76  analysis.reserve_climb.acmodel.Cl_diff.CL_diff      i   0.000000E+00    2.776749E-01    1.000000E+30              9.00000E+100\
+         77  analysis.reserve_cruise.acmodel.Cl_diff.CL_diff     i   0.000000E+00    6.067239E-01    1.000000E+30              9.00000E+100\
+         78  analysis.reserve_cruise.acmodel.Cl_diff.CL_diff     i   0.000000E+00    6.068768E-01    1.000000E+30              9.00000E+100\
+         79  analysis.reserve_cruise.acmodel.Cl_diff.CL_diff     i   0.000000E+00    6.070296E-01    1.000000E+30              9.00000E+100\
+         80  analysis.reserve_cruise.acmodel.Cl_diff.CL_diff     i   0.000000E+00    6.071823E-01    1.000000E+30              9.00000E+100\
+         81  analysis.reserve_cruise.acmodel.Cl_diff.CL_diff     i   0.000000E+00    6.073351E-01    1.000000E+30              9.00000E+100\
+         82  analysis.reserve_cruise.acmodel.Cl_diff.CL_diff     i   0.000000E+00    6.074879E-01    1.000000E+30              9.00000E+100\
+         83  analysis.reserve_cruise.acmodel.Cl_diff.CL_diff     i   0.000000E+00    6.076406E-01    1.000000E+30              9.00000E+100\
+         84  analysis.reserve_cruise.acmodel.Cl_diff.CL_diff     i   0.000000E+00    6.077933E-01    1.000000E+30              9.00000E+100\
+         85  analysis.reserve_cruise.acmodel.Cl_diff.CL_diff     i   0.000000E+00    6.079460E-01    1.000000E+30              9.00000E+100\
+         86  analysis.reserve_cruise.acmodel.Cl_diff.CL_diff     i   0.000000E+00    6.080987E-01    1.000000E+30              9.00000E+100\
+         87  analysis.reserve_cruise.acmodel.Cl_diff.CL_diff     i   0.000000E+00    6.082513E-01    1.000000E+30              9.00000E+100\
+         88  analysis.reserve_descent.acmodel.Cl_diff.CL_diff    i   0.000000E+00    3.943596E-01    1.000000E+30              9.00000E+100\
+         89  analysis.reserve_descent.acmodel.Cl_diff.CL_diff    i   0.000000E+00    3.947600E-01    1.000000E+30              9.00000E+100\
+         90  analysis.reserve_descent.acmodel.Cl_diff.CL_diff    i   0.000000E+00    3.951296E-01    1.000000E+30              9.00000E+100\
+         91  analysis.reserve_descent.acmodel.Cl_diff.CL_diff    i   0.000000E+00    3.954691E-01    1.000000E+30              9.00000E+100\
+         92  analysis.reserve_descent.acmodel.Cl_diff.CL_diff    i   0.000000E+00    3.957792E-01    1.000000E+30              9.00000E+100\
+         93  analysis.reserve_descent.acmodel.Cl_diff.CL_diff    i   0.000000E+00    3.960610E-01    1.000000E+30              9.00000E+100\
+         94  analysis.reserve_descent.acmodel.Cl_diff.CL_diff    i   0.000000E+00    3.963153E-01    1.000000E+30              9.00000E+100\
+         95  analysis.reserve_descent.acmodel.Cl_diff.CL_diff    i   0.000000E+00    3.965434E-01    1.000000E+30              9.00000E+100\
+         96  analysis.reserve_descent.acmodel.Cl_diff.CL_diff    i   0.000000E+00    3.967462E-01    1.000000E+30              9.00000E+100\
+         97  analysis.reserve_descent.acmodel.Cl_diff.CL_diff    i   0.000000E+00    3.969250E-01    1.000000E+30              9.00000E+100\
+         98  analysis.reserve_descent.acmodel.Cl_diff.CL_diff    i   0.000000E+00    3.970807E-01    1.000000E+30              9.00000E+100\
+         99  analysis.loiter.acmodel.Cl_diff.CL_diff             i   0.000000E+00   -9.999982E-09    1.000000E+30         l    9.00000E+100\
+        100  analysis.loiter.acmodel.Cl_diff.CL_diff             i   0.000000E+00    6.399483E-04    1.000000E+30              9.00000E+100\
+        101  analysis.loiter.acmodel.Cl_diff.CL_diff             i   0.000000E+00    1.279282E-03    1.000000E+30              9.00000E+100\
+        102  analysis.loiter.acmodel.Cl_diff.CL_diff             i   0.000000E+00    1.917991E-03    1.000000E+30              9.00000E+100\
+        103  analysis.loiter.acmodel.Cl_diff.CL_diff             i   0.000000E+00    2.556078E-03    1.000000E+30              9.00000E+100\
+        104  analysis.loiter.acmodel.Cl_diff.CL_diff             i   0.000000E+00    3.193544E-03    1.000000E+30              9.00000E+100\
+        105  analysis.loiter.acmodel.Cl_diff.CL_diff             i   0.000000E+00    3.830389E-03    1.000000E+30              9.00000E+100\
+        106  analysis.loiter.acmodel.Cl_diff.CL_diff             i   0.000000E+00    4.466614E-03    1.000000E+30              9.00000E+100\
+        107  analysis.loiter.acmodel.Cl_diff.CL_diff             i   0.000000E+00    5.102221E-03    1.000000E+30              9.00000E+100\
+        108  analysis.loiter.acmodel.Cl_diff.CL_diff             i   0.000000E+00    5.737212E-03    1.000000E+30              9.00000E+100\
+        109  analysis.loiter.acmodel.Cl_diff.CL_diff             i   0.000000E+00    6.371586E-03    1.000000E+30              9.00000E+100\
+        110  analysis.rotate.tod_final.range_final               i  -1.000000E+30    8.367096E+02    1.000000E+03              9.00000E+100\
+        111  analysis.v1v0.ode_integ_phase.range_final           i  -1.000000E+30    8.367096E+02    1.000000E+03              9.00000E+100\
+\
+--------------------------------------------------------------------------------\
+\
+Driver debug print for iter coord: rank0:pyOptSparse_IPOPT|30\
+-------------------------------------------------------------\
+Design Vars\
+\{'ac|geom|wing|twist': array([0.        , 0.86706307, 1.07135211, 0.73473775, 0.6064528 ]),\
+ 'dv_comp.ac|geom|wing|AR': array([7.99999991]),\
+ 'dv_comp.ac|geom|wing|S_ref': array([18.39377156]),\
+ 'dv_comp.ac|geom|wing|c4sweep': array([0.63240993]),\
+ 'dv_comp.ac|geom|wing|taper': array([0.50562311]),\
+ 'dv_comp.ac|propulsion|engine|rating': array([673.69686955])\}\
+\
+NL: Newton 0 ; 1.82636553e-12 1\
+NL: Newton Converged\
+Nonlinear constraints\
+\{'analysis.climb.acmodel.Cl_diff.CL_diff': array([0.14544512, 0.14626958, 0.14710901, 0.14796254, 0.14882932,\
+       0.14970858, 0.15059985, 0.15150307, 0.15241928, 0.15335023,\
+       0.1542991 ]),\
+ 'analysis.climb.steadyflt.throttle': array([1.00000001, 0.9915193 , 0.98332678, 0.97540498, 0.96776129,\
+       0.96045569, 0.95379077, 0.94833375, 0.94482295, 0.94414279,\
+       0.94716088]),\
+ 'analysis.cruise.acmodel.Cl_diff.CL_diff': array([0.55970013, 0.56399705, 0.56827759, 0.5725421 , 0.57679091,\
+       0.58102439, 0.58524284, 0.58944662, 0.59363604, 0.59781143,\
+       0.6019731 ]),\
+ 'analysis.cruise.steadyflt.throttle': array([0.85835653, 0.85505524, 0.85182411, 0.84866214, 0.84556837,\
+       0.8425419 , 0.83958182, 0.83668728, 0.83385742, 0.83109145,\
+       0.82838857]),\
+ 'analysis.descent.acmodel.Cl_diff.CL_diff': array([0.38140614, 0.38189764, 0.38234877, 0.38276057, 0.3831341 ,\
+       0.38347052, 0.3837712 , 0.38403759, 0.3842713 , 0.3844739 ,\
+       0.38464698]),\
+ 'analysis.descent.steadyflt.throttle': array([0.2074903 , 0.1898681 , 0.17268416, 0.15589246, 0.1395296 ,\
+       0.1236631 , 0.10835886, 0.0936641 , 0.07960137, 0.06617011,\
+       0.05335463]),\
+ 'analysis.loiter.acmodel.Cl_diff.CL_diff': array([-9.99998151e-09,  6.39948252e-04,  1.27928163e-03,  1.91799125e-03,\
+        2.55607821e-03,  3.19354361e-03,  3.83038856e-03,  4.46661414e-03,\
+        5.10222145e-03,  5.73721159e-03,  6.37158564e-03]),\
+ 'analysis.reserve_climb.acmodel.Cl_diff.CL_diff': array([0.27120909, 0.27181425, 0.27243002, 0.27305586, 0.27369117,\
+       0.27433534, 0.27498777, 0.27564794, 0.27631568, 0.27699107,\
+       0.27767487]),\
+ 'analysis.reserve_cruise.acmodel.Cl_diff.CL_diff': array([0.60672394, 0.60687676, 0.60702956, 0.60718234, 0.60733511,\
+       0.60748785, 0.60764058, 0.60779329, 0.60794598, 0.60809866,\
+       0.60825131]),\
+ 'analysis.reserve_descent.acmodel.Cl_diff.CL_diff': array([0.3943596 , 0.39476002, 0.3951296 , 0.39546906, 0.39577921,\
+       0.39606096, 0.39631532, 0.39654337, 0.3967462 , 0.39692496,\
+       0.39708073]),\
+ 'analysis.rotate.tod_final.range_final': array([836.70960862]),\
+ 'analysis.v1v0.ode_integ_phase.range_final': array([836.70960862])\}\
+\
+Objectives\
+\{'analysis.descent.acmodel.intfuel.fuel_used_final': array([593.40356685])\}}
