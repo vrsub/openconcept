@@ -421,7 +421,7 @@ def show_outputs(prob):
             x_label=x_label,
             y_labels=y_labels,
             marker="-",
-            plot_title="737-800 Mission Profile",
+            plot_title="737-800 Mission Profile", 
         )
 
 
@@ -430,8 +430,8 @@ def run_738_analysis(plots=True):
     prob = configure_problem()
     prob.setup(check=True, mode="fwd")
     set_values(prob, num_nodes)
-    prob.run_model()
-    # prob.run_driver()
+    # prob.run_model()
+    prob.run_driver()
     prob.model.list_outputs()
     om.n2(prob, outfile="B738_fullsizing_originaldesign.html")
     if plots:

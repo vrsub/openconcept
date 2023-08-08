@@ -9,12 +9,26 @@ from openconcept.utilities.math import AddSubtractComp, ElementMultiplyDivideCom
 
 
 class WingWeight_JetTrasport(ExplicitComponent):
-    """Inputs: MTOW, ac|geom|wing|S_ref, ac|geom|wing|AR, ac|geom|wing|c4sweep, ac|geom|wing|taper, ac|geom|wing|toverc, V_H (max SL speed)
-    Outputs: W_wing
-    Metadata: n_ult (ult load factor)
+    '''
+    The component computes wing weights based on the Raymer component weight buildup equations.
 
-    """
+    Inputs
+    ------
+    ac|weights|MTOW : float
+        Maximum takeoff weight of aircraft (scalar, lbs)
+    ac|wing|geom|* : float
+        Dictionary of aircraft wing design parameters, Area, c4sweep, taper, t/c, AR
 
+    Outputs
+    -------
+    W_wing : float
+        Estimated wing weight (lbs)
+
+    Options
+    -------
+    n_ult : int
+        Ultimate load factor, dimensionless
+    '''
     def initialize(self):
         # self.options.declare('num_nodes', default=1, desc='Number of flight/control conditions')
         # define configuration parameters
